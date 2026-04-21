@@ -1,4 +1,4 @@
-package com.apiplatform.api_platform.dto.response;
+package com.apiplatform.api_platform.auth.dto.response;
 
 import lombok.*;
 
