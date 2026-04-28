@@ -4,6 +4,7 @@ import com.apiplatform.api_platform.auth.dto.request.LoginRequest;
 import com.apiplatform.api_platform.auth.dto.request.SignupRequest;
 import com.apiplatform.api_platform.auth.dto.response.AuthResponse;
 import com.apiplatform.api_platform.auth.entity.User;
+import com.apiplatform.api_platform.auth.exception.InvalidCredentialsException;
 import com.apiplatform.api_platform.auth.exception.UserAlreadyExistsException;
 import com.apiplatform.api_platform.auth.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,15 +61,10 @@ public class AuthService {
 
     public AuthResponse login(LoginRequest loginDto)
     {
-        Optional<User> optionalUser = userRepository.findByEmail(loginDto.getEmail());
-        if(!optionalUser.isPresent())
-        {
-            throw new RuntimeException("Invalid credentials");
-        }
-        User user = optionalUser.get();
+        User user = userRepository.findByEmail(loginDto.getEmail()).orElseThrow(()->new InvalidCredentialsException("Invalid credentials"));
         if(!passwordEncoder.matches(loginDto.getPassword(), user.getPassword()))
         {
-            throw new RuntimeException("Invalid credentials");
+            throw new InvalidCredentialsException("Invalid credentials");
         }
 
         String token = "dummy-token";

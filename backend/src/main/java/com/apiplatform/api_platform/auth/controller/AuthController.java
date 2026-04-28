@@ -3,6 +3,7 @@ package com.apiplatform.api_platform.auth.controller;
 import com.apiplatform.api_platform.auth.dto.request.LoginRequest;
 import com.apiplatform.api_platform.auth.dto.request.SignupRequest;
 import com.apiplatform.api_platform.auth.dto.response.AuthResponse;
+import com.apiplatform.api_platform.auth.service.AuthService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
