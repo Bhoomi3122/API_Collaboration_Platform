@@ -4,9 +4,9 @@ import com.apiplatform.api_platform.auth.dto.request.LoginRequest;
 import com.apiplatform.api_platform.auth.dto.request.SignupRequest;
 import com.apiplatform.api_platform.auth.dto.response.AuthResponse;
 import com.apiplatform.api_platform.auth.service.AuthService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import jakarta.Validation.valid;
 
 @RestController
 @RequestMapping("/api/auth")
