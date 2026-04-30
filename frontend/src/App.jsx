@@ -1,7 +1,7 @@
+import Signup from "./pages/auth/Signup";
+
 function App() {
-  return (
-    <h1>API Collaboration Platform</h1>
-  );
+  return <Signup />;
 }
 
 export default App;
