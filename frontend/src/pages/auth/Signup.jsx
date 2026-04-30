@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { signup } from "../../services/authApi";
-import "../../components/auth/AuthForm.css";
+import "../../styles/variables.css";
+import "../../components/auth/Signup.css";
 
 const passwordRules = [
   { label: "Uppercase", test: (v) => /[A-Z]/.test(v) },
