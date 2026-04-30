@@ -2,7 +2,7 @@ import { useState } from "react";
 import { login } from "../../services/authApi";
 import { validateEmail, validatePassword } from "../../utils/validators";
 import "../../styles/variables.css";
-import "../../components/auth/AuthForm.css";
+import "../../components/auth/login.css";
 
 function Login() {
   const [email, setEmail] = useState("");
