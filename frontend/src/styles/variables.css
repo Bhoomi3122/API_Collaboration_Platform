@@ -1,0 +1,28 @@
+:root {
+  --bg: #F6F8FA;
+  --section: #F1F3F5;
+  --card: #FFFFFF;
+  --border: #D0D7DE;
+  --text: #24292F;
+  --text-secondary: #57606A;
+  --text-muted: #8C959F;
+  --primary: #2F81F7;
+  --primary-hover: #1F6FEB;
+  --accent: #F97316;
+  --success: #2DA44E;
+  --error: #D1242F;
+  --warning: #BF8700;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, 'Inter', sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+
