@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { login } from "../../services/authApi";
 import { validateEmail, validatePassword } from "../../utils/validators";
 import "../../styles/variables.css";
@@ -97,7 +98,7 @@ function Login() {
 
         <p className="signup-redirect">
           Don't have an account?{" "}
-          <span onClick={() => console.log("Navigate to signup")}>Sign up</span>
+          <Link to="/signup">Sign up</Link>
         </p>
       </div>
     </div>

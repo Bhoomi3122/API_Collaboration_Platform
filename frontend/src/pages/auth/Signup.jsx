@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { signup } from "../../services/authApi";
 import "../../styles/variables.css";
 import "../../components/auth/Signup.css";
@@ -142,7 +143,7 @@ export default function Signup() {
         )}
 
         <p className="login-link">
-          Already have an account? <a href="/login">Login</a>
+          Already have an account? <Link to="/login">Login</Link>
         </p>
       </form>
     </div>
