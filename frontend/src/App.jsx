@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Signup from "./pages/auth/Signup";
 import Login from "./pages/auth/Login";
@@ -13,12 +12,6 @@ function App() {
       </Routes>
     </Router>
   );
-=======
-import Login from "./pages/auth/Login";
-
-function App() {
-  return <Login />;
->>>>>>> Stashed changes
 }
 
 export default App;
