@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { signup } from "../../services/authApi";
 import "../../styles/variables.css";
 import "../../components/auth/Signup.css";
@@ -27,6 +27,7 @@ function validateForm(form) {
 }
 
 export default function Signup() {
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -39,7 +40,7 @@ export default function Signup() {
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-    setErrors({ ...errors, [e.target.name]: "" });
+    setErrors(prev => ({ ...prev, [e.target.name]: "" }));
     setMessage(null);
   };
 
@@ -53,12 +54,17 @@ export default function Signup() {
     setLoading(true);
     setMessage(null);
     try {
-      await signup({ name: form.name, email: form.email, password: form.password });
+      const response = await signup({
+        name: form.name.trim(),
+        email: form.email.trim(),
+        password: form.password,
+      });
       setMessage({ type: "success", text: "Account created successfully!" });
       setForm({ name: "", email: "", password: "", confirmPassword: "" });
+      setTimeout(() => navigate("/login"), 1500);
     } catch (err) {
       const text =
-        err.response?.data?.message || err.response?.data?.error || "Signup failed. Please try again.";
+        err.response?.data?.message || "Signup failed. Please try again.";
       setMessage({ type: "error", text });
     } finally {
       setLoading(false);
