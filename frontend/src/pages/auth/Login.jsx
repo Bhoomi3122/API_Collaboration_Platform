@@ -40,6 +40,7 @@ function Login() {
     try {
       const response = await login({ email, password });
       console.log("Login successful:", response.data);
+      localStorage.setItem("token", response.data.token);
       setSuccess("Login successful!");
     } catch (err) {
       console.error("Login failed:", err);
