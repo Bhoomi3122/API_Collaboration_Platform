@@ -1,4 +1,4 @@
-package com.apiplatform.api_platform.auth.exception;
+package com.apiplatform.api_platform.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
