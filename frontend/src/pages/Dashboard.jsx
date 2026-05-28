@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/dashboard/Sidebar";
 import Topbar from "../components/dashboard/Topbar";
 import QuickActions from "../components/dashboard/QuickActions";
@@ -7,6 +9,20 @@ import ApiPreviewWidget from "../components/dashboard/ApiPreviewWidget";
 import "../styles/dashboard.css";
 
 function Dashboard() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login");
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/login");
+  };
+
   const mockWorkspaces = [
     {
       title: "E-Commerce Platform",
@@ -35,7 +51,7 @@ function Dashboard() {
     <div className="dashboard-container">
       <Sidebar />
       <main className="dashboard-main">
-        <Topbar />
+        <Topbar onLogout={handleLogout} />
         <div className="dashboard-content">
           <div className="welcome-section">
             <h1 className="welcome-title">Welcome back!</h1>
