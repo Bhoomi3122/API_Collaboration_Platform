@@ -1,5 +1,6 @@
 package com.apiplatform.api_platform.auth.entity;
 
+import com.apiplatform.api_platform.workspace.entity.Workspace;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -34,6 +36,9 @@ public class User {
 
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "owner")
+    private List<Workspace> workspaces;
 
     @PrePersist
     protected void onCreate() {

@@ -1,5 +1,9 @@
-package com.apiplatform.api_platform.auth.exception;
+package com.apiplatform.api_platform.exception;
 
+import com.apiplatform.api_platform.auth.exception.InvalidCredentialsException;
+import com.apiplatform.api_platform.auth.exception.UserAlreadyExistsException;
+import com.apiplatform.api_platform.auth.exception.UserNotFoundException;
+import com.apiplatform.api_platform.workspace.exception.WorkspaceNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -69,4 +73,27 @@ public class GlobalExceptionHandler {
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUserNotFoundException(UserNotFoundException ex)
+    {
+        ErrorResponse errorResponse = new ErrorResponse(
+                ex.getMessage(),
+                HttpStatus.NOT_FOUND.value(),
+                LocalDateTime.now().toString()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    @ExceptionHandler(WorkspaceNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handlerWorkspaceNotFoundException(WorkspaceNotFoundException ex)
+    {
+        ErrorResponse errorResponse = new ErrorResponse(
+                ex.getMessage(),
+                HttpStatus.NOT_FOUND.value(),
+                LocalDateTime.now().toString()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
 }
