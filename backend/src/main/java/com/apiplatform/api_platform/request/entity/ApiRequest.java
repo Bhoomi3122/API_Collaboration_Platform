@@ -1,0 +1,60 @@
+package com.apiplatform.api_platform.request.entity;
+
+import com.apiplatform.api_platform.collection.entity.Collection;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "api_requests")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class ApiRequest {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private String name;
+
+    @Column(nullable = false)
+    private String method; // GET, POST, PUT, DELETE, etc.
+
+    @Column(nullable = false)
+    private String url;
+
+    @Column(columnDefinition = "TEXT")
+    private String headers;
+
+    @Column(columnDefinition = "TEXT")
+    private String body;
+
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "collection_id", nullable = false)
+    private Collection collection;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
+}
+
