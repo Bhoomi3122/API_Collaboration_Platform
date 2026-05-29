@@ -19,14 +19,14 @@ export const getWorkspaceById = async (workspaceId) => {
 
 // Get collections for a workspace
 export const getCollectionsByWorkspace = async (workspaceId) => {
-  const response = await apiClient.get(`/workspaces/${workspaceId}/collections`);
+  const response = await apiClient.get(`/collections/workspace/${workspaceId}`);
   return response.data;
 };
 
 // Create new collection in workspace
 export const createCollection = async (workspaceId, collectionData) => {
   const response = await apiClient.post(
-    `/workspaces/${workspaceId}/collections`,
+    `/collections`,
     collectionData
   );
   return response.data;

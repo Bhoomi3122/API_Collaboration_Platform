@@ -1,13 +1,33 @@
+import { useState, useEffect } from "react";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 import QuickActions from "./QuickActions";
 import WorkspaceCard from "./WorkspaceCard";
 import CollectionsList from "./CollectionsList";
 import ApiPreviewWidget from "./ApiPreviewWidget";
-import { mockWorkspaces } from "../../data/mockData";
+import { getWorkspaces } from "../../services/workspaceApi";
 import "../../styles/dashboard.css";
 
 function Dashboard() {
+  const [workspaces, setWorkspaces] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadWorkspaces();
+  }, []);
+
+  const loadWorkspaces = async () => {
+    try {
+      const data = await getWorkspaces();
+      setWorkspaces(data || []);
+    } catch (err) {
+      console.error("Error loading workspaces:", err);
+      setWorkspaces([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="dashboard-container">
       <Sidebar />
@@ -26,9 +46,19 @@ function Dashboard() {
           <div className="workspaces-section">
             <h3 className="section-title">Recent Workspaces</h3>
             <div className="workspaces-grid">
-              {mockWorkspaces.map((workspace) => (
-                <WorkspaceCard key={workspace.id} workspace={workspace} />
-              ))}
+              {loading ? (
+                <p style={{ color: "var(--text-secondary)", gridColumn: "1 / -1" }}>
+                  Loading workspaces...
+                </p>
+              ) : workspaces.length > 0 ? (
+                workspaces.map((workspace) => (
+                  <WorkspaceCard key={workspace.id} workspace={workspace} />
+                ))
+              ) : (
+                <p style={{ color: "var(--text-secondary)", gridColumn: "1 / -1" }}>
+                  No workspaces yet. Create one to get started!
+                </p>
+              )}
             </div>
           </div>
 
