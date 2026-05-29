@@ -3,6 +3,7 @@ package com.apiplatform.api_platform.exception;
 import com.apiplatform.api_platform.auth.exception.InvalidCredentialsException;
 import com.apiplatform.api_platform.auth.exception.UserAlreadyExistsException;
 import com.apiplatform.api_platform.auth.exception.UserNotFoundException;
+import com.apiplatform.api_platform.collection.exception.CollectionNotFoundException;
 import com.apiplatform.api_platform.workspace.exception.WorkspaceNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
@@ -52,6 +53,17 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ResourceNotFoundException ex)
+    {
+        ErrorResponse errorResponse = new ErrorResponse(
+                ex.getMessage(),
+                HttpStatus.NOT_FOUND.value(),
+                LocalDateTime.now().toString()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException ex)
     {
@@ -76,6 +88,17 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(WorkspaceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handlerWorkspaceNotFoundException(WorkspaceNotFoundException ex)
+    {
+        ErrorResponse errorResponse = new ErrorResponse(
+                ex.getMessage(),
+                HttpStatus.NOT_FOUND.value(),
+                LocalDateTime.now().toString()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    @ExceptionHandler(CollectionNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleCollectionNotFoundException(CollectionNotFoundException ex)
     {
         ErrorResponse errorResponse = new ErrorResponse(
                 ex.getMessage(),

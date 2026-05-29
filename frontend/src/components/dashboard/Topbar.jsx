@@ -1,4 +1,4 @@
-function Topbar() {
+function Topbar({ onLogout }) {
   return (
     <header className="topbar">
       <div className="topbar-search">
@@ -19,7 +19,7 @@ function Topbar() {
           <div className="avatar">U</div>
           <span className="username">User</span>
         </div>
-        <button className="logout-button">Logout</button>
+        <button className="logout-button" onClick={onLogout}>Logout</button>
       </div>
     </header>
   );
