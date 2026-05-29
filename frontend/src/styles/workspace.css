@@ -23,6 +23,199 @@
 }
 
 /* ===================================
+   LOADING STATE
+   =================================== */
+
+.workspace-loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  padding: 60px 20px;
+}
+
+.workspace-loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--ws-border);
+  border-top-color: var(--ws-primary);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ===================================
+   ERROR STATE
+   =================================== */
+
+.workspace-error-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  padding: 60px 20px;
+}
+
+.error-state-card {
+  background: var(--ws-card);
+  border: 1px solid var(--ws-border);
+  border-radius: 12px;
+  padding: 48px 40px;
+  max-width: 500px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.error-state-icon {
+  width: 64px;
+  height: 64px;
+  background: rgba(209, 36, 47, 0.08);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #D1242F;
+  margin-bottom: 24px;
+}
+
+.error-state-icon svg {
+  width: 28px;
+  height: 28px;
+  stroke-width: 2;
+}
+
+.error-state-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--ws-text);
+  margin: 0 0 12px 0;
+  letter-spacing: -0.01em;
+}
+
+.error-state-message {
+  font-size: 14px;
+  color: var(--ws-text-secondary);
+  line-height: 1.6;
+  margin: 0 0 32px 0;
+  max-width: 400px;
+}
+
+.error-state-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* ===================================
+   EMPTY STATE
+   =================================== */
+
+.workspace-empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  padding: 60px 20px;
+}
+
+.empty-state-card {
+  background: var(--ws-card);
+  border: 1px solid var(--ws-border);
+  border-radius: 12px;
+  padding: 48px 40px;
+  max-width: 500px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.empty-state-icon {
+  width: 64px;
+  height: 64px;
+  background: var(--ws-section);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ws-text-muted);
+  margin-bottom: 24px;
+}
+
+.empty-state-icon svg {
+  width: 28px;
+  height: 28px;
+  stroke-width: 2;
+}
+
+.empty-state-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--ws-text);
+  margin: 0 0 12px 0;
+  letter-spacing: -0.01em;
+}
+
+.empty-state-message {
+  font-size: 14px;
+  color: var(--ws-text-secondary);
+  line-height: 1.6;
+  margin: 0 0 32px 0;
+  max-width: 400px;
+}
+
+/* ===================================
+   BUTTONS
+   =================================== */
+
+.btn-primary,
+.btn-secondary {
+  height: 40px;
+  padding: 0 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: var(--ws-primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--ws-primary-hover);
+}
+
+.btn-secondary {
+  background: var(--ws-card);
+  border: 1px solid var(--ws-border);
+  color: var(--ws-text);
+}
+
+.btn-secondary:hover {
+  background: var(--ws-bg);
+  border-color: var(--ws-text-secondary);
+}
+
+/* ===================================
    NAVBAR - SLIM & REFINED
    =================================== */
 
@@ -237,7 +430,92 @@
   background: var(--ws-primary);
   border-radius: 0 2px 2px 0;
 }
-
+.sidebar-nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  background: var(--ws-primary);
+  border-radius: 0 2px 2px 0;
+}
+/* Dashboard Navigation Button */
+.sidebar-dashboard-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 12px;
+  margin-bottom: 16px;
+  background: transparent;
+  border: 1px solid var(--ws-border);
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ws-text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.sidebar-dashboard-btn:hover {
+  background: var(--ws-card);
+  border-color: var(--ws-border-hover);
+  color: var(--ws-text);
+}
+.sidebar-dashboard-btn svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+/* Workspace Info Card */
+.sidebar-workspace-card {
+  background: var(--ws-card);
+  border: 1px solid var(--ws-border);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.workspace-card-icon {
+  width: 32px;
+  height: 32px;
+  background: var(--ws-sidebar-bg);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ws-text-secondary);
+  flex-shrink: 0;
+}
+.workspace-card-icon svg {
+  width: 16px;
+  height: 16px;
+}
+.workspace-card-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ws-text);
+  margin: 0;
+  line-height: 1.3;
+  word-break: break-word;
+}
+.workspace-card-description {
+  font-size: 11px;
+  color: var(--ws-text-muted);
+  margin: 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+/* Main Content Wrapper */
+.workspace-main-content {
+  width: 100%;
+}
+/* ===================================
 /* ===================================
    WORKSPACE HEADER - VERTICAL LAYOUT
    =================================== */
@@ -760,6 +1038,33 @@
    RESPONSIVE
    =================================== */
 
+@media (max-width: 768px) {
+  .error-state-card,
+  .empty-state-card {
+    padding: 36px 28px;
+  }
+
+  .error-state-title,
+  .empty-state-title {
+    font-size: 18px;
+  }
+
+  .error-state-message,
+  .empty-state-message {
+    font-size: 13px;
+  }
+
+  .error-state-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+  }
+}
+
 @media (max-width: 1024px) {
   .workspace-sidebar {
     width: 240px;
@@ -816,3 +1121,102 @@
   }
 }
 
+/* ===================================
+   COLLECTION CARD MENU DROPDOWN
+   =================================== */
+.collection-menu-wrapper {
+  position: relative;
+}
+.collection-menu-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: var(--ws-card);
+  border: 1px solid var(--ws-border);
+  border-radius: 8px;
+  min-width: 160px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  z-index: 1000;
+  overflow: hidden;
+  margin-top: 4px;
+}
+.menu-item {
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--ws-text);
+  display: block;
+}
+.menu-item:hover {
+  background: var(--ws-bg);
+}
+.menu-item-edit:hover {
+  color: var(--ws-primary);
+}
+.menu-item-delete {
+  color: #D1242F;
+  border-top: 1px solid var(--ws-border);
+}
+.menu-item-delete:hover {
+  background: rgba(209, 36, 47, 0.06);
+  color: #B91C1F;
+}
+/* ===================================
+   DELETE CONFIRMATION MODAL STYLES
+   =================================== */
+.delete-confirmation-modal {
+  max-width: 420px;
+}
+.delete-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  background: rgba(209, 36, 47, 0.1);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #D1242F;
+  flex-shrink: 0;
+}
+.delete-icon-wrapper svg {
+  width: 24px;
+  height: 24px;
+  stroke-width: 2;
+}
+.delete-title {
+  color: #D1242F;
+}
+.delete-message {
+  font-size: 14px;
+  color: var(--ws-text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+.btn-delete {
+  height: 38px;
+  padding: 0 18px;
+  border: none;
+  background: #D1242F;
+  color: white;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-delete:hover:not(:disabled) {
+  background: #B91C1F;
+}
+.btn-delete:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
