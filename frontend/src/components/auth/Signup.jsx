@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { signup } from "../../services/authApi";
 import "../../styles/variables.css";
-import "../../components/auth/Signup.css";
+import "../../styles/Signup.css";
 
 const passwordRules = [
   { label: "Uppercase", test: (v) => /[A-Z]/.test(v) },
