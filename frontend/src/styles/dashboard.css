@@ -333,7 +333,7 @@
   margin-bottom: 12px;
 }
 
-.workspace-title {
+.workspace-title-card {
   font-size: 15px;
   font-weight: 600;
   color: var(--text);
@@ -361,11 +361,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding-top: 2px;
 }
 
 .collaborators {
   display: flex;
-  gap: -8px;
+  align-items: center;
 }
 
 .collaborator-avatar {

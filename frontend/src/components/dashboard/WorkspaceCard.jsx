@@ -1,8 +1,16 @@
+import { useNavigate } from "react-router-dom";
+
 function WorkspaceCard({ workspace }) {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate(`/workspace/${workspace.id}`);
+  };
+
   return (
-    <div className="workspace-card">
+    <div className="workspace-card" onClick={handleClick}>
       <div className="workspace-header">
-        <h4 className="workspace-title">{workspace.title}</h4>
+        <h4 className="workspace-title-card">{workspace.name}</h4>
         <span className="workspace-badge">{workspace.apiCount} APIs</span>
       </div>
       <p className="workspace-description">{workspace.description}</p>

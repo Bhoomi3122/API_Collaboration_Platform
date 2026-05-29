@@ -1,13 +1,17 @@
-function Sidebar() {
+import { useNavigate } from "react-router-dom";
+
+function Sidebar({ activeItem = "Dashboard" }) {
+  const navigate = useNavigate();
+
   const menuItems = [
-    { name: "Dashboard", icon: "dashboard", active: true },
-    { name: "Workspaces", icon: "workspaces", active: false },
-    { name: "Collections", icon: "collections", active: false },
-    { name: "API Requests", icon: "api", active: false },
-    { name: "Environment Variables", icon: "variables", active: false },
-    { name: "Team Collaboration", icon: "team", active: false },
-    { name: "Settings", icon: "settings", active: false },
+    { name: "Dashboard", icon: "dashboard", path: "/dashboard" },
+    { name: "Workspaces", icon: "workspaces", path: "/workspaces" },
+    { name: "Settings", icon: "settings", path: "/settings" },
   ];
+
+  const handleNavigation = (path) => {
+    navigate(path);
+  };
 
   const renderIcon = (iconName) => {
     const icons = {
@@ -72,9 +76,10 @@ function Sidebar() {
         {menuItems.map((item, index) => (
           <div
             key={index}
-            className={`sidebar-item ${item.active ? "active" : ""}`}
+            className={`sidebar-item ${item.name === activeItem ? "active" : ""}`}
+            onClick={() => handleNavigation(item.path)}
           >
-            {item.active && <span className="active-indicator"></span>}
+            {item.name === activeItem && <span className="active-indicator"></span>}
             <span className="sidebar-icon">{renderIcon(item.icon)}</span>
             <span className="sidebar-text">{item.name}</span>
           </div>

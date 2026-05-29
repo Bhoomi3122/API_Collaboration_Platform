@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { login } from "../../services/authApi";
 import { validateEmail, validatePassword } from "../../utils/validators";
 import "../../styles/variables.css";
-import "../../components/auth/login.css";
+import "../../styles/login.css";
 
 function Login() {
   const navigate = useNavigate();
