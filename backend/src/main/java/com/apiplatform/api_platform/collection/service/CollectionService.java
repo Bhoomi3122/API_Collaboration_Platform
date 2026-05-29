@@ -1,12 +1,12 @@
-package com.apiplatform.api_platform.auth.service;
+package com.apiplatform.api_platform.collection.service;
 
-import com.apiplatform.api_platform.auth.dto.request.CreateCollectionRequest;
-import com.apiplatform.api_platform.auth.dto.response.CollectionResponse;
-import com.apiplatform.api_platform.auth.entity.Collection;
-import com.apiplatform.api_platform.auth.entity.Workspace;
-import com.apiplatform.api_platform.auth.exception.ResourceNotFoundException;
-import com.apiplatform.api_platform.auth.repository.CollectionRepository;
-import com.apiplatform.api_platform.auth.repository.WorkspaceRepository;
+import com.apiplatform.api_platform.collection.dto.request.CreateCollectionRequest;
+import com.apiplatform.api_platform.collection.dto.response.CollectionResponse;
+import com.apiplatform.api_platform.collection.entity.Collection;
+import com.apiplatform.api_platform.collection.repository.CollectionRepository;
+import com.apiplatform.api_platform.workspace.entity.Workspace;
+import com.apiplatform.api_platform.workspace.repository.WorkspaceRepository;
+import com.apiplatform.api_platform.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

@@ -2,7 +2,6 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Signup from "./pages/auth/Signup";
 import Login from "./pages/auth/Login";
 import Dashboard from "./pages/Dashboard";
-import WorkspaceDetails from "./pages/workspace/WorkspaceDetails";
 
 function App() {
   return (
@@ -12,7 +11,6 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/workspace/:id" element={<WorkspaceDetails />} />
       </Routes>
     </Router>
   );

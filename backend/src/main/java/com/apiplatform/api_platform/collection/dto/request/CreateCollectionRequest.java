@@ -1,4 +1,4 @@
-package com.apiplatform.api_platform.auth.dto.request;
+package com.apiplatform.api_platform.collection.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

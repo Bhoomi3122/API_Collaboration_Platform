@@ -1,8 +1,9 @@
-package com.apiplatform.api_platform.auth.controller;
 
-import com.apiplatform.api_platform.auth.dto.request.CreateCollectionRequest;
-import com.apiplatform.api_platform.auth.dto.response.CollectionResponse;
-import com.apiplatform.api_platform.auth.service.CollectionService;
+package com.apiplatform.api_platform.collection.controller;
+
+import com.apiplatform.api_platform.collection.dto.request.CreateCollectionRequest;
+import com.apiplatform.api_platform.collection.dto.response.CollectionResponse;
+import com.apiplatform.api_platform.collection.service.CollectionService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

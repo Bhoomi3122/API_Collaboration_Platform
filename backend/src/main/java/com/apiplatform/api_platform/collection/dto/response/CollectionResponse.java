@@ -1,4 +1,4 @@
-package com.apiplatform.api_platform.auth.dto.response;
+package com.apiplatform.api_platform.collection.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

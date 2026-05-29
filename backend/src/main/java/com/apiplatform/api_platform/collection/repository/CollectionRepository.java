@@ -1,7 +1,7 @@
-package com.apiplatform.api_platform.auth.repository;
+package com.apiplatform.api_platform.collection.repository;
 
-import com.apiplatform.api_platform.auth.entity.Collection;
-import com.apiplatform.api_platform.auth.entity.Workspace;
+import com.apiplatform.api_platform.collection.entity.Collection;
+import com.apiplatform.api_platform.workspace.entity.Workspace;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

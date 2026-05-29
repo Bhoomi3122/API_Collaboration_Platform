@@ -1,5 +1,6 @@
-package com.apiplatform.api_platform.auth.entity;
+package com.apiplatform.api_platform.collection.entity;
 
+import com.apiplatform.api_platform.workspace.entity.Workspace;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
