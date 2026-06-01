@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Plus } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Plus, ChevronDown } from "lucide-react";
 
 const HTTP_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"];
 const TABS = ["Docs", "Params", "Authorization", "Headers", "Body", "Scripts", "Settings"];
@@ -151,6 +151,18 @@ const RequestEditor = ({ request }) => {
   const [activeTab, setActiveTab] = useState("Body");
   const [body, setBody]           = useState("");
   const [scripts, setScripts]     = useState("");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const methodStyle = METHOD_COLORS[method] || METHOD_COLORS.GET;
 
@@ -175,7 +187,34 @@ const RequestEditor = ({ request }) => {
           onChange={(e) => setUrl(e.target.value)}
         />
 
-        <button className="cd-send-btn">Send</button>
+        {/* ── Split button group ── */}
+        <div className="cd-send-group" ref={dropdownRef}>
+          <button className="cd-send-btn">Send</button>
+          <button
+            className="cd-send-dropdown-toggle"
+            onClick={() => setDropdownOpen((p) => !p)}
+            title="More options"
+          >
+            <ChevronDown size={14} />
+          </button>
+          {dropdownOpen && (
+            <div className="cd-send-dropdown-menu">
+              <button
+                className="cd-send-dropdown-item"
+                onClick={() => { console.log("Save Request clicked"); setDropdownOpen(false); }}
+              >
+                Save Request
+              </button>
+              <button
+                className="cd-send-dropdown-item"
+                onClick={() => { console.log("Save & Send clicked"); setDropdownOpen(false); }}
+              >
+                Save &amp; Send
+              </button>
+            </div>
+          )}
+        </div>
+        {/* ── end split button group ── */}
       </div>
 
       {/* ── Tabs ── */}
