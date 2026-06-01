@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Bell, ChevronDown, Share2, Settings, Layers } from "lucide-react";
 import ApiSidebar from "./ApiSidebar";
 import RequestEditor from "./RequestEditor";
 import ResponseViewer from "./ResponseViewer";
@@ -9,11 +9,11 @@ import "../../styles/collectionDetails.css";
 const MOCK_COLLECTION = {
   name: "User Authentication APIs",
   description:
-    "A curated collection of authentication and authorization endpoints for core platform services.",
+    "A curated collection of authentication and authorization endpoints.",
   createdAt: "2 days ago",
   apiCount: 3,
   collaboratorCount: 2,
-  workspace: "Acme Platform",
+  workspace: "Ecommerce",
 };
 
 const CollectionDetails = () => {
@@ -22,30 +22,53 @@ const CollectionDetails = () => {
   return (
     <div className="cd-shell">
 
-      {/* ── Breadcrumb ──────────────────────────── */}
-      <nav className="cd-breadcrumb">
-        <button className="cd-breadcrumb-link">
-          <ArrowLeft size={13} />
-          {MOCK_COLLECTION.workspace}
-        </button>
+      {/* ── Top Navbar ──────────────────────────── */}
+      <nav className="cd-navbar">
+        <div className="cd-navbar-left">
+          <div className="cd-navbar-logo">
+            <Layers size={14} />
+          </div>
+          <span className="cd-navbar-title">DevHub</span>
+          <span className="cd-navbar-divider">|</span>
+          <span className="cd-navbar-subtitle">API Platform</span>
+        </div>
+        <div className="cd-navbar-right">
+          <button className="cd-navbar-icon-btn">
+            <Bell size={16} />
+          </button>
+          <div className="cd-navbar-profile">
+            <div className="cd-navbar-avatar">U</div>
+            <ChevronDown size={14} />
+          </div>
+        </div>
       </nav>
 
       {/* ── Collection Header Card ───────────────── */}
       <header className="cd-header">
         <div className="cd-header-left">
+          <button className="cd-breadcrumb-link">
+            <ArrowLeft size={12} />
+            {MOCK_COLLECTION.workspace}
+          </button>
           <h1 className="cd-header-name">{MOCK_COLLECTION.name}</h1>
           <p className="cd-header-description">{MOCK_COLLECTION.description}</p>
           <div className="cd-header-meta">
             <span>Created {MOCK_COLLECTION.createdAt}</span>
-            <span className="cd-meta-dot" />
+            <span className="cd-meta-dot">•</span>
             <span>{MOCK_COLLECTION.apiCount} APIs</span>
-            <span className="cd-meta-dot" />
+            <span className="cd-meta-dot">•</span>
             <span>{MOCK_COLLECTION.collaboratorCount} collaborators</span>
           </div>
         </div>
         <div className="cd-header-actions">
-          <button className="cd-btn-ghost">Share</button>
-          <button className="cd-btn-ghost">Settings</button>
+          <button className="cd-btn-secondary">
+            <Share2 size={14} />
+            Share
+          </button>
+          <button className="cd-btn-secondary">
+            <Settings size={14} />
+            Settings
+          </button>
         </div>
       </header>
 

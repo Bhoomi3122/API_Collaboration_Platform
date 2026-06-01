@@ -1,18 +1,18 @@
 import { useState } from "react";
-import { Search, Plus, ChevronDown, ChevronRight, Folder } from "lucide-react";
+import { Search, Plus, ChevronDown, ChevronRight } from "lucide-react";
 
 // Mock data for Phase 1 — represents requests within a single collection
 const MOCK_GROUPS = [
 	{
 		id: "g1",
-		name: "Authentication",
+		name: "AUTHENTICATION",
 		requests: [
-			{ id: 1, name: "Login", method: "POST", url: "/api/auth/login" },
+			{ id: 1, name: "Login", method: "GET", url: "/api/auth/login" },
 			{ id: 2, name: "Signup", method: "POST", url: "/api/auth/signup" },
 			{
 				id: 3,
 				name: "Get Profile",
-				method: "GET",
+				method: "PUT",
 				url: "/api/users/profile",
 			},
 		],
@@ -41,7 +41,7 @@ const ApiSidebar = ({ selectedId, onSelect }) => {
 			{/* Search + New Request */}
 			<div className="cd-sidebar-top">
 				<div className="cd-search-wrapper">
-					<Search className="cd-search-icon" size={13} />
+					<Search className="cd-search-icon" size={14} />
 					<input
 						type="text"
 						className="cd-search-input"
@@ -51,7 +51,7 @@ const ApiSidebar = ({ selectedId, onSelect }) => {
 					/>
 				</div>
 				<button className="cd-new-btn">
-					<Plus size={13} />
+					<Plus size={14} />
 					New Request
 				</button>
 			</div>
@@ -70,14 +70,6 @@ const ApiSidebar = ({ selectedId, onSelect }) => {
 									className="cd-group-header"
 									onClick={() => toggleGroup(group.id)}
 								>
-									<span className="cd-group-icon">
-										{isOpen ? (
-											<ChevronDown size={12} />
-										) : (
-											<ChevronRight size={12} />
-										)}
-									</span>
-									<Folder size={12} className="cd-group-icon" />
 									{group.name}
 								</div>
 

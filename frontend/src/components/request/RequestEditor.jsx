@@ -133,11 +133,11 @@ const SettingsTab = () => {
   );
 };
 
-// ── Method colour map (matches sidebar badges) ─────────────────
+// ── Method colour map (matches design spec) ─────────────────
 const METHOD_COLORS = {
-  GET:     { color: "#15803D", bg: "#DCFCE7" },
-  POST:    { color: "#2563EB", bg: "#DBEAFE" },
-  PUT:     { color: "#D97706", bg: "#FEF3C7" },
+  GET:     { color: "#2F9E44", bg: "#E6F4EA" },
+  POST:    { color: "#4B61FF", bg: "#E8ECFF" },
+  PUT:     { color: "#B88300", bg: "#FFF2D6" },
   PATCH:   { color: "#EA580C", bg: "#FFEDD5" },
   DELETE:  { color: "#7C3AED", bg: "#F3E8FF" },
   HEAD:    { color: "#6B7280", bg: "#F3F4F6" },
