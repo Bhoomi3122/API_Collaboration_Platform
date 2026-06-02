@@ -1,8 +1,10 @@
-import { Search, SlidersHorizontal, Plus } from "lucide-react";
+import { Search, Plus } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import CollectionCard from "./CollectionCard";
 import EmptyCollectionsState from "./EmptyCollectionsState";
 import "../../styles/workspace.css";
+
 const CollectionList = ({
   collections = [],
   onCreateCollection,
@@ -10,11 +12,14 @@ const CollectionList = ({
   onDeleteCollection,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
+
   const filteredCollections = collections.filter((collection) =>
     collection.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
   const handleCollectionClick = (collection) => {
-    console.log("Collection clicked:", collection);
+    navigate(`/collection/${collection.id}`);
   };
   const handleCreateClick = () => {
     if (onCreateCollection) {

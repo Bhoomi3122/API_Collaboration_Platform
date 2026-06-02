@@ -1,29 +1,60 @@
+import apiClient from "./apiClient";
+
 /**
- * Request API service — Phase 1 (Mock placeholders only)
- * Backend integration will be added in Phase 2.
+ * Request API service
  */
 
 // Get all API requests for a collection
 export const getRequestsByCollection = async (collectionId) => {
-  return Promise.resolve([
-    { id: 1, name: "Login", method: "POST", url: "/api/auth/login", collectionId },
-    { id: 2, name: "Signup", method: "POST", url: "/api/auth/signup", collectionId },
-    { id: 3, name: "Get Profile", method: "GET", url: "/api/users/profile", collectionId },
-  ]);
+  try {
+    const response = await apiClient.get(`/requests/collection/${collectionId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching requests by collection:", error);
+    throw error;
+  }
+};
+
+// Get a single API request by ID
+export const getRequestById = async (id) => {
+  try {
+    const response = await apiClient.get(`/requests/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching request by id:", error);
+    throw error;
+  }
 };
 
 // Create a new API request in a collection
 export const createRequest = async (requestData) => {
-  return Promise.resolve({ id: Date.now(), ...requestData });
+  try {
+    const response = await apiClient.post("/requests", requestData);
+    return response.data;
+  } catch (error) {
+    console.error("Error creating request:", error);
+    throw error;
+  }
 };
 
 // Update an existing API request
-export const updateRequest = async (requestId, requestData) => {
-  return Promise.resolve({ id: requestId, ...requestData });
+export const updateRequest = async (id, requestData) => {
+  try {
+    const response = await apiClient.put(`/requests/${id}`, requestData);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating request:", error);
+    throw error;
+  }
 };
 
 // Delete an API request
-export const deleteRequest = async (requestId) => {
-  return Promise.resolve({ success: true, id: requestId });
+export const deleteRequest = async (id) => {
+  try {
+    const response = await apiClient.delete(`/requests/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting request:", error);
+    throw error;
+  }
 };
-
