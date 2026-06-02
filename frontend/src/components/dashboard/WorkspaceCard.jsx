@@ -1,9 +1,25 @@
 import { useNavigate } from "react-router-dom";
 
+// ── Helpers ──────────────────────────────────────────────────
+export const getVisitCounts = () => {
+  try {
+    return JSON.parse(localStorage.getItem("wsVisits") || "{}");
+  } catch {
+    return {};
+  }
+};
+
+const recordVisit = (id) => {
+  const counts = getVisitCounts();
+  counts[id] = (counts[id] || 0) + 1;
+  localStorage.setItem("wsVisits", JSON.stringify(counts));
+};
+
 function WorkspaceCard({ workspace }) {
   const navigate = useNavigate();
 
   const handleClick = () => {
+    recordVisit(workspace.id);
     navigate(`/workspace/${workspace.id}`);
   };
 

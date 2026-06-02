@@ -285,21 +285,31 @@ const RequestEditor = ({ request, onSave, onDelete, saving = false, saveMessage 
               >
                 Save &amp; Send
               </button>
+              {/* Update Request — only for existing saved requests */}
+              {request?.id && (
+                <button
+                  className="cd-send-dropdown-item"
+                  disabled={saving}
+                  onClick={() => {
+                    setDropdownOpen(false);
+                    if (onSave) onSave({ method, url, headers, body });
+                  }}
+                >
+                  {saving ? "Updating..." : "Update Request"}
+                </button>
+              )}
               {/* Only show Delete for existing (saved) requests */}
               {request?.id && (
-                <>
-                  <div style={{ height: 1, background: "#E5E7EB", margin: "4px 0" }} />
-                  <button
-                    className="cd-send-dropdown-item"
-                    style={{ color: "#DC2626" }}
-                    onClick={() => {
-                      setDropdownOpen(false);
-                      if (onDelete) onDelete();
-                    }}
-                  >
-                    Delete Request
-                  </button>
-                </>
+                <button
+                  className="cd-send-dropdown-item"
+                  style={{ color: "#DC2626" }}
+                  onClick={() => {
+                    setDropdownOpen(false);
+                    if (onDelete) onDelete();
+                  }}
+                >
+                  Delete Request
+                </button>
               )}
             </div>
           )}

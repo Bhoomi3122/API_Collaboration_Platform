@@ -1,19 +1,23 @@
-function QuickActions() {
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import CreateWorkspaceModal from "./CreateWorkspaceModal";
+
+function QuickActions({ onWorkspaceCreated }) {
+  const navigate = useNavigate();
+  const [modalOpen, setModalOpen] = useState(false);
+
   const actions = [
     {
       title: "Create Workspace",
-      description: "Start a new workspace for your APIs",
+      description: "Start a new workspace to organise your API collections",
       icon: "create",
+      onClick: () => setModalOpen(true),
     },
     {
-      title: "New Collection",
-      description: "Organize your API requests",
-      icon: "collection",
-    },
-    {
-      title: "Send API Request",
-      description: "Test your API endpoints",
-      icon: "send",
+      title: "Browse Workspaces",
+      description: "View and open your existing workspaces",
+      icon: "workspaces",
+      onClick: () => navigate("/workspaces"),
     },
   ];
 
@@ -26,16 +30,9 @@ function QuickActions() {
           <line x1="8" y1="12" x2="16" y2="12"></line>
         </svg>
       ),
-      collection: (
+      workspaces: (
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
-          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
-        </svg>
-      ),
-      send: (
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <line x1="22" y1="2" x2="11" y2="13"></line>
-          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
         </svg>
       ),
     };
@@ -43,18 +40,29 @@ function QuickActions() {
   };
 
   return (
-    <div className="quick-actions">
-      <h3 className="section-title">Quick Actions</h3>
-      <div className="actions-grid">
-        {actions.map((action, index) => (
-          <button key={index} className="action-card">
-            <span className="action-icon">{renderIcon(action.icon)}</span>
-            <h4 className="action-title">{action.title}</h4>
-            <p className="action-description">{action.description}</p>
-          </button>
-        ))}
+    <>
+      <CreateWorkspaceModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSuccess={() => {
+          setModalOpen(false);
+          if (onWorkspaceCreated) onWorkspaceCreated();
+        }}
+      />
+
+      <div className="quick-actions">
+        <h3 className="section-title">Quick Actions</h3>
+        <div className="actions-grid">
+          {actions.map((action, index) => (
+            <button key={index} className="action-card" onClick={action.onClick}>
+              <span className="action-icon">{renderIcon(action.icon)}</span>
+              <h4 className="action-title">{action.title}</h4>
+              <p className="action-description">{action.description}</p>
+            </button>
+          ))}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 

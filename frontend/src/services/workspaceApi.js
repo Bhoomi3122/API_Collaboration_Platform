@@ -5,9 +5,21 @@ import apiClient from "./apiClient";
  * Handles all workspace-related API calls
  */
 
+// Get single collection by ID
+export const getCollectionById = async (collectionId) => {
+  const response = await apiClient.get(`/collections/${collectionId}`);
+  return response.data;
+};
+
 // Get all workspaces for current user
 export const getWorkspaces = async () => {
   const response = await apiClient.get("/workspaces");
+  return response.data;
+};
+
+// Create a new workspace
+export const createWorkspace = async (workspaceData) => {
+  const response = await apiClient.post("/workspaces", workspaceData);
   return response.data;
 };
 

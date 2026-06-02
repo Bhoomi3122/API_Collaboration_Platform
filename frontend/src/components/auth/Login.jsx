@@ -76,8 +76,9 @@ function Login() {
 
       console.log("Login successful:", response.data);
 
-      // Store token
+      // Store token and user info
       localStorage.setItem("token", response.data.token);
+      localStorage.setItem("userEmail", email);
 
       console.log("Token stored successfully");
 

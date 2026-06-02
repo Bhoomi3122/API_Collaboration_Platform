@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Bell, ChevronDown, Share2, Settings, Layers } from "lucide-react";
 import ApiSidebar from "./ApiSidebar";
 import RequestEditor from "./RequestEditor";
@@ -11,6 +11,7 @@ import {
   updateRequest,
   deleteRequest,
 } from "../../services/requestApi";
+import { getCollectionById, getWorkspaceById } from "../../services/workspaceApi";
 import "../../styles/collectionDetails.css";
 
 // Mock collection data — will be replaced when collection API is connected
@@ -26,7 +27,10 @@ const MOCK_COLLECTION = {
 
 const CollectionDetails = () => {
   const { collectionId } = useParams();
+  const navigate = useNavigate();
 
+  const [collection, setCollection]           = useState(null);
+  const [workspace, setWorkspace]             = useState(null);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [requests, setRequests]               = useState([]);
   const [loading, setLoading]                 = useState(true);
@@ -64,7 +68,19 @@ const CollectionDetails = () => {
   };
 
   useEffect(() => {
-    if (collectionId) fetchRequests();
+    if (collectionId) {
+      fetchRequests();
+      getCollectionById(collectionId)
+        .then((col) => {
+          setCollection(col);
+          if (col?.workspaceId) {
+            getWorkspaceById(col.workspaceId)
+              .then(setWorkspace)
+              .catch((err) => console.error("Failed to load workspace:", err));
+          }
+        })
+        .catch((err) => console.error("Failed to load collection:", err));
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [collectionId]);
 
@@ -220,12 +236,19 @@ const CollectionDetails = () => {
       {/* ── Collection Header Card ───────────────── */}
       <header className="cd-header">
         <div className="cd-header-left">
-          <button className="cd-breadcrumb-link">
+          <button
+            className="cd-breadcrumb-link"
+            onClick={() =>
+              collection?.workspaceId
+                ? navigate(`/workspace/${collection.workspaceId}`)
+                : navigate(-1)
+            }
+          >
             <ArrowLeft size={12} />
-            {MOCK_COLLECTION.workspace}
+            {collection?.workspaceName || workspace?.name || MOCK_COLLECTION.workspace}
           </button>
-          <h1 className="cd-header-name">{MOCK_COLLECTION.name}</h1>
-          <p className="cd-header-description">{MOCK_COLLECTION.description}</p>
+          <h1 className="cd-header-name">{collection?.name || MOCK_COLLECTION.name}</h1>
+          <p className="cd-header-description">{collection?.description || MOCK_COLLECTION.description}</p>
           <div className="cd-header-meta">
             <span>Created {MOCK_COLLECTION.createdAt}</span>
             <span className="cd-meta-dot">•</span>

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Search, Plus, FolderOpen, Calendar, AlertCircle } from "lucide-react";
 import Sidebar from "../dashboard/Sidebar";
 import Topbar from "../dashboard/Topbar";
+import CreateWorkspaceModal from "../dashboard/CreateWorkspaceModal";
 import { getWorkspaces } from "../../services/workspaceApi";
 import "../../styles/AllWorkspacesPage.css";
 
@@ -13,6 +14,7 @@ function AllWorkspacesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     loadWorkspaces();
@@ -49,8 +51,7 @@ function AllWorkspacesPage() {
   };
 
   const handleCreateWorkspace = () => {
-    console.log("Create workspace clicked");
-    // TODO: Implement workspace creation modal/flow
+    setModalOpen(true);
   };
 
   const formatDate = (dateString) => {
@@ -159,6 +160,15 @@ function AllWorkspacesPage() {
       <main className="dashboard-main">
         <Topbar />
         <div className="dashboard-content">
+
+          <CreateWorkspaceModal
+            isOpen={modalOpen}
+            onClose={() => setModalOpen(false)}
+            onSuccess={() => {
+              setModalOpen(false);
+              loadWorkspaces();
+            }}
+          />
           <div className="workspaces-page-header">
             <div className="header-content">
               <h1 className="page-title">Workspaces</h1>
