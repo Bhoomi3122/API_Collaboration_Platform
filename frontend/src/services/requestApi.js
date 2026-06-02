@@ -58,3 +58,15 @@ export const deleteRequest = async (id) => {
     throw error;
   }
 };
+
+// Execute an API request
+export const executeRequest = async (id) => {
+  try {
+    const response = await apiClient.post(`/requests/${id}/execute`);
+    return response.data;
+  } catch (error) {
+    console.error("Error executing request:", error);
+    throw error;
+  }
+};
+

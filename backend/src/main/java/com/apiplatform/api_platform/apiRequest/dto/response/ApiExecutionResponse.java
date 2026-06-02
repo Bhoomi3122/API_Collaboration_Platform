@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Map;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -14,4 +16,6 @@ public class ApiExecutionResponse {
     private int statusCode;
     private String responseBody;
     private long responseTime;
+    private Map<String, String> responseHeaders;
+
 }

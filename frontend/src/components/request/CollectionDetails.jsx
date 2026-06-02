@@ -10,6 +10,7 @@ import {
   createRequest,
   updateRequest,
   deleteRequest,
+  executeRequest,
 } from "../../services/requestApi";
 import "../../styles/collectionDetails.css";
 
@@ -35,6 +36,9 @@ const CollectionDetails = () => {
   const [requestError, setRequestError]       = useState(null);
   const [saving, setSaving]                   = useState(false);
   const [saveMessage, setSaveMessage]         = useState(null);
+  const [executing, setExecuting]             = useState(false);
+  const [executionResponse, setExecutionResponse] = useState(null);
+  const [executionError, setExecutionError]   = useState(null);
 
   // ── Load sidebar list ────────────────────────────────────────
   const fetchRequests = async (reselectId = null) => {
@@ -73,6 +77,8 @@ const CollectionDetails = () => {
     try {
       if (showLoading) setRequestLoading(true);
       setRequestError(null);
+      setExecutionResponse(null);
+      setExecutionError(null);
       const full = await getRequestById(id);
       setSelectedRequest(full);
     } catch (error) {
@@ -80,6 +86,28 @@ const CollectionDetails = () => {
       setRequestError("Failed to load request details.");
     } finally {
       if (showLoading) setRequestLoading(false);
+    }
+  };
+
+  // ── Execute request ───────────────────────────────────────────
+  const handleExecute = async () => {
+    if (!selectedRequest?.id) return;
+
+    setExecuting(true);
+    setExecutionError(null);
+    setExecutionResponse(null);
+
+    try {
+      const result = await executeRequest(selectedRequest.id);
+      setExecutionResponse(result);
+    } catch (error) {
+      console.error("Execution failed:", error);
+      const errorMsg = error.response?.data?.message
+        || error.message
+        || "Network error. Please check your connection and try again.";
+      setExecutionError(errorMsg);
+    } finally {
+      setExecuting(false);
     }
   };
 
@@ -146,6 +174,8 @@ const CollectionDetails = () => {
       body:    "",
     });
     setRequestError(null);
+    setExecutionResponse(null);
+    setExecutionError(null);
   };
 
   // ── Derive main panel content ────────────────────────────────
@@ -175,10 +205,16 @@ const CollectionDetails = () => {
             request={selectedRequest}
             onSave={handleSave}
             onDelete={handleDelete}
+            onExecute={handleExecute}
             saving={saving}
             saveMessage={saveMessage}
+            executing={executing}
           />
-          <ResponseViewer />
+          <ResponseViewer
+            response={executionResponse}
+            loading={executing}
+            error={executionError}
+          />
         </>
       );
     }
