@@ -196,7 +196,7 @@ const SettingsTab = () => {
 // ── Method colour map (matches design spec) ─────────────────
 
 // ── RequestEditor (main export) ─────────────────────────────────
-const RequestEditor = ({ request, onSave, onDelete, saving = false, saveMessage = null }) => {
+const RequestEditor = ({ request, onSave, onDelete, onExecute, saving = false, saveMessage = null, executing = false }) => {
   const [method, setMethod]       = useState(request?.method || "GET");
   const [url, setUrl]             = useState(request?.url    || "");
   const [activeTab, setActiveTab] = useState("Body");
@@ -259,11 +259,20 @@ const RequestEditor = ({ request, onSave, onDelete, saving = false, saveMessage 
 
         {/* ── Split button group ── */}
         <div className="cd-send-group" ref={dropdownRef}>
-          <button className="cd-send-btn">Send</button>
+          <button
+            className="cd-send-btn"
+            onClick={() => {
+              if (onExecute && request?.id) onExecute();
+            }}
+            disabled={executing || !request?.id}
+          >
+            {executing ? "Sending..." : "Send"}
+          </button>
           <button
             className="cd-send-dropdown-toggle"
             onClick={() => setDropdownOpen((p) => !p)}
             title="More options"
+            disabled={executing}
           >
             <ChevronDown size={14} />
           </button>
