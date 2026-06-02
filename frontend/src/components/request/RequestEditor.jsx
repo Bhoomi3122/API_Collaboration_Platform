@@ -1,9 +1,69 @@
-import { useState } from "react";
-import { Plus } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Plus, ChevronDown } from "lucide-react";
 
 const HTTP_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"];
 const TABS = ["Docs", "Params", "Authorization", "Headers", "Body", "Scripts", "Settings"];
 const AUTH_TYPES = ["No Auth", "Bearer Token", "Basic Auth", "API Key"];
+
+// ── Method colour map ───────────────────────────────────────────
+const METHOD_COLORS = {
+  GET:     { color: "#2F9E44", bg: "#E6F4EA" },
+  POST:    { color: "#4B61FF", bg: "#E8ECFF" },
+  PUT:     { color: "#B88300", bg: "#FFF2D6" },
+  PATCH:   { color: "#EA580C", bg: "#FFEDD5" },
+  DELETE:  { color: "#7C3AED", bg: "#F3E8FF" },
+  HEAD:    { color: "#6B7280", bg: "#F3F4F6" },
+  OPTIONS: { color: "#EA00FF", bg: "#F9F0FF" },
+};
+
+// ── Custom Method Dropdown ──────────────────────────────────────
+const MethodDropdown = ({ method, onChange }) => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const current = METHOD_COLORS[method] || METHOD_COLORS.GET;
+
+  return (
+    <div className="cd-method-dropdown" ref={ref}>
+      <button
+        className="cd-method-trigger"
+        style={{ color: current.color, background: current.bg }}
+        onClick={() => setOpen((p) => !p)}
+        type="button"
+      >
+        {method}
+        <ChevronDown size={12} style={{ marginLeft: 4, opacity: 0.7 }} />
+      </button>
+
+      {open && (
+        <div className="cd-method-menu">
+          {HTTP_METHODS.map((m) => {
+            const style = METHOD_COLORS[m] || METHOD_COLORS.GET;
+            return (
+              <button
+                key={m}
+                className={`cd-method-option${method === m ? " active" : ""}`}
+                style={{ color: style.color }}
+                onClick={() => { onChange(m); setOpen(false); }}
+                type="button"
+              >
+                {m}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
 
 // ── Key-Value Table (Params & Headers) ─────────────────────────
 const KVTable = ({ colHeaders, placeholder }) => {
@@ -134,38 +194,60 @@ const SettingsTab = () => {
 };
 
 // ── Method colour map (matches design spec) ─────────────────
-const METHOD_COLORS = {
-  GET:     { color: "#2F9E44", bg: "#E6F4EA" },
-  POST:    { color: "#4B61FF", bg: "#E8ECFF" },
-  PUT:     { color: "#B88300", bg: "#FFF2D6" },
-  PATCH:   { color: "#EA580C", bg: "#FFEDD5" },
-  DELETE:  { color: "#7C3AED", bg: "#F3E8FF" },
-  HEAD:    { color: "#6B7280", bg: "#F3F4F6" },
-  OPTIONS: { color: "#6B7280", bg: "#F3F4F6" },
-};
 
 // ── RequestEditor (main export) ─────────────────────────────────
-const RequestEditor = ({ request }) => {
+const RequestEditor = ({ request, onSave, onDelete, saving = false, saveMessage = null }) => {
   const [method, setMethod]       = useState(request?.method || "GET");
   const [url, setUrl]             = useState(request?.url    || "");
   const [activeTab, setActiveTab] = useState("Body");
-  const [body, setBody]           = useState("");
+  const [body, setBody]           = useState(request?.body   || "");
   const [scripts, setScripts]     = useState("");
+  const [headers, setHeaders]     = useState(request?.headers || "");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
-  const methodStyle = METHOD_COLORS[method] || METHOD_COLORS.GET;
+  // Sync editor fields whenever the selected request changes
+  useEffect(() => {
+    if (request) {
+      setMethod(request.method || "GET");
+      setUrl(request.url || "");
+      setBody(request.body || "");
+      setHeaders(request.headers || "");
+      setActiveTab("Body");
+    }
+  }, [request?.id]);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const methodStyle = METHOD_COLORS[method] || METHOD_COLORS.GET; // kept for badge use
 
   return (
     <div className="cd-editor">
+      {/* ── Save message banner ── */}
+      {saveMessage && (
+        <div style={{
+          padding: "8px 16px",
+          fontSize: "13px",
+          fontWeight: 500,
+          background: saveMessage.type === "success" ? "#E6F4EA" : "#FEE2E2",
+          color: saveMessage.type === "success" ? "#2F9E44" : "#DC2626",
+          borderBottom: `1px solid ${saveMessage.type === "success" ? "#BBF7D0" : "#FECACA"}`,
+        }}>
+          {saveMessage.text}
+        </div>
+      )}
+
       {/* ── URL Row ── */}
       <div className="cd-editor-url-row">
-        <select
-          className="cd-method-select"
-          value={method}
-          onChange={(e) => setMethod(e.target.value)}
-          style={{ color: methodStyle.color, background: methodStyle.bg }}
-        >
-          {HTTP_METHODS.map((m) => <option key={m}>{m}</option>)}
-        </select>
+        <MethodDropdown method={method} onChange={setMethod} />
 
         <input
           type="text"
@@ -175,7 +257,54 @@ const RequestEditor = ({ request }) => {
           onChange={(e) => setUrl(e.target.value)}
         />
 
-        <button className="cd-send-btn">Send</button>
+        {/* ── Split button group ── */}
+        <div className="cd-send-group" ref={dropdownRef}>
+          <button className="cd-send-btn">Send</button>
+          <button
+            className="cd-send-dropdown-toggle"
+            onClick={() => setDropdownOpen((p) => !p)}
+            title="More options"
+          >
+            <ChevronDown size={14} />
+          </button>
+          {dropdownOpen && (
+            <div className="cd-send-dropdown-menu">
+              <button
+                className="cd-send-dropdown-item"
+                disabled={saving}
+                onClick={() => {
+                  setDropdownOpen(false);
+                  if (onSave) onSave({ method, url, headers, body });
+                }}
+              >
+                {saving ? "Saving..." : "Save Request"}
+              </button>
+              <button
+                className="cd-send-dropdown-item"
+                onClick={() => { console.log("Save & Send clicked"); setDropdownOpen(false); }}
+              >
+                Save &amp; Send
+              </button>
+              {/* Only show Delete for existing (saved) requests */}
+              {request?.id && (
+                <>
+                  <div style={{ height: 1, background: "#E5E7EB", margin: "4px 0" }} />
+                  <button
+                    className="cd-send-dropdown-item"
+                    style={{ color: "#DC2626" }}
+                    onClick={() => {
+                      setDropdownOpen(false);
+                      if (onDelete) onDelete();
+                    }}
+                  >
+                    Delete Request
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+        {/* ── end split button group ── */}
       </div>
 
       {/* ── Tabs ── */}
@@ -208,10 +337,20 @@ const RequestEditor = ({ request }) => {
         {activeTab === "Authorization" && <AuthTab />}
 
         {activeTab === "Headers" && (
-          <KVTable
-            colHeaders={["Key", "Value"]}
-            placeholder={["Content-Type", "application/json"]}
-          />
+          headers ? (
+            <textarea
+              className="cd-textarea"
+              placeholder="Headers (key: value)"
+              value={typeof headers === "object" ? JSON.stringify(headers, null, 2) : headers}
+              onChange={(e) => setHeaders(e.target.value)}
+              rows={7}
+            />
+          ) : (
+            <KVTable
+              colHeaders={["Key", "Value"]}
+              placeholder={["Content-Type", "application/json"]}
+            />
+          )
         )}
 
         {activeTab === "Body" && (
