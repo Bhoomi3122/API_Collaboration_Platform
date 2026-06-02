@@ -1,4 +1,4 @@
-package com.apiplatform.api_platform.request.dto.response;
+package com.apiplatform.api_platform.apiRequest.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,6 +17,7 @@ public class ApiRequestResponse {
     private String name;
     private String method;
     private String url;
+    private String description;
     private String headers;
     private String body;
     private Long collectionId;

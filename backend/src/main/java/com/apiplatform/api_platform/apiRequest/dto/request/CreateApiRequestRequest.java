@@ -1,4 +1,4 @@
-package com.apiplatform.api_platform.request.dto.request;
+package com.apiplatform.api_platform.apiRequest.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -21,6 +21,8 @@ public class CreateApiRequestRequest {
 
     @NotBlank(message = "URL is required")
     private String url;
+
+    private String description;
 
     private String headers;
 

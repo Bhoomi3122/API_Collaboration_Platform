@@ -1,4 +1,4 @@
-package com.apiplatform.api_platform.request.exception;
+package com.apiplatform.api_platform.apiRequest.exception;
 
 public class ApiRequestNotFoundException extends RuntimeException {
 

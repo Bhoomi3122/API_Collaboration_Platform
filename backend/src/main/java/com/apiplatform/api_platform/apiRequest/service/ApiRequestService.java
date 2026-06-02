@@ -1,13 +1,13 @@
-package com.apiplatform.api_platform.request.service;
+package com.apiplatform.api_platform.apiRequest.service;
 
 import com.apiplatform.api_platform.collection.entity.Collection;
 import com.apiplatform.api_platform.collection.repository.CollectionRepository;
 import com.apiplatform.api_platform.exception.ResourceNotFoundException;
-import com.apiplatform.api_platform.request.dto.request.CreateApiRequestRequest;
-import com.apiplatform.api_platform.request.dto.response.ApiRequestResponse;
-import com.apiplatform.api_platform.request.entity.ApiRequest;
-import com.apiplatform.api_platform.request.exception.ApiRequestNotFoundException;
-import com.apiplatform.api_platform.request.repository.ApiRequestRepository;
+import com.apiplatform.api_platform.apiRequest.dto.request.CreateApiRequestRequest;
+import com.apiplatform.api_platform.apiRequest.dto.response.ApiRequestResponse;
+import com.apiplatform.api_platform.apiRequest.entity.ApiRequest;
+import com.apiplatform.api_platform.apiRequest.exception.ApiRequestNotFoundException;
+import com.apiplatform.api_platform.apiRequest.repository.ApiRequestRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -37,6 +37,7 @@ public class ApiRequestService {
         response.setBody(apiRequest.getBody());
         response.setCollectionId(apiRequest.getCollection().getId());
         response.setCreatedAt(apiRequest.getCreatedAt());
+        response.setDescription(apiRequest.getDescription());
         return response;
     }
 
@@ -51,6 +52,7 @@ public class ApiRequestService {
         apiRequest.setName(request.getName());
         apiRequest.setMethod(request.getMethod());
         apiRequest.setUrl(request.getUrl());
+        apiRequest.setDescription(request.getDescription());
         apiRequest.setHeaders(request.getHeaders());
         apiRequest.setBody(request.getBody());
         apiRequest.setCollection(collection);
@@ -101,6 +103,7 @@ public class ApiRequestService {
         existing.setName(request.getName());
         existing.setMethod(request.getMethod());
         existing.setUrl(request.getUrl());
+        existing.setDescription(request.getDescription());
         existing.setHeaders(request.getHeaders());
         existing.setBody(request.getBody());
 

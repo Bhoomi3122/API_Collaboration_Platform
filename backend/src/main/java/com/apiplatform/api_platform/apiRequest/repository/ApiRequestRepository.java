@@ -1,7 +1,7 @@
-package com.apiplatform.api_platform.request.repository;
+package com.apiplatform.api_platform.apiRequest.repository;
 
 import com.apiplatform.api_platform.collection.entity.Collection;
-import com.apiplatform.api_platform.request.entity.ApiRequest;
+import com.apiplatform.api_platform.apiRequest.entity.ApiRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

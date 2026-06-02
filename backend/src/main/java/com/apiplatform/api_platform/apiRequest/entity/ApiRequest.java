@@ -1,4 +1,4 @@
-package com.apiplatform.api_platform.request.entity;
+package com.apiplatform.api_platform.apiRequest.entity;
 
 import com.apiplatform.api_platform.collection.entity.Collection;
 import jakarta.persistence.*;
@@ -29,6 +29,9 @@ public class ApiRequest {
 
     @Column(nullable = false)
     private String url;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
 
     @Column(columnDefinition = "TEXT")
     private String headers;

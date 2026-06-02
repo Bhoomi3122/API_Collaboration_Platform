@@ -1,8 +1,10 @@
-package com.apiplatform.api_platform.request.controller;
+package com.apiplatform.api_platform.apiRequest.controller;
 
-import com.apiplatform.api_platform.request.dto.request.CreateApiRequestRequest;
-import com.apiplatform.api_platform.request.dto.response.ApiRequestResponse;
-import com.apiplatform.api_platform.request.service.ApiRequestService;
+import com.apiplatform.api_platform.apiRequest.dto.request.CreateApiRequestRequest;
+import com.apiplatform.api_platform.apiRequest.dto.response.ApiExecutionResponse;
+import com.apiplatform.api_platform.apiRequest.dto.response.ApiRequestResponse;
+import com.apiplatform.api_platform.apiRequest.service.ApiRequestService;
+import com.apiplatform.api_platform.apiRequest.service.ApiExecutionService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,9 +18,10 @@ import java.util.List;
 public class ApiRequestController {
 
     private final ApiRequestService apiRequestService;
-
-    public ApiRequestController(ApiRequestService apiRequestService) {
+    private final ApiExecutionService apiExecutionService;
+    public ApiRequestController(ApiRequestService apiRequestService, ApiExecutionService apiExecutionService) {
         this.apiRequestService = apiRequestService;
+        this.apiExecutionService = apiExecutionService;
     }
 
     // ── POST /api/requests ──────────────────────────────────────────────────────
@@ -60,5 +63,14 @@ public class ApiRequestController {
     public ResponseEntity<Void> deleteRequest(@PathVariable Long id) {
         apiRequestService.deleteRequest(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/execute")
+    public ResponseEntity<ApiExecutionResponse> executeRequest(
+            @PathVariable Long id
+    ) {
+        return ResponseEntity.ok(
+                apiExecutionService.executeRequest(id)
+        );
     }
 }

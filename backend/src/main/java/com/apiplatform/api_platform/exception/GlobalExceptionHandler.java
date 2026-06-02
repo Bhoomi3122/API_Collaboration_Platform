@@ -4,7 +4,7 @@ import com.apiplatform.api_platform.auth.exception.InvalidCredentialsException;
 import com.apiplatform.api_platform.auth.exception.UserAlreadyExistsException;
 import com.apiplatform.api_platform.auth.exception.UserNotFoundException;
 import com.apiplatform.api_platform.collection.exception.CollectionNotFoundException;
-import com.apiplatform.api_platform.request.exception.ApiRequestNotFoundException;
+import com.apiplatform.api_platform.apiRequest.exception.ApiRequestNotFoundException;
 import com.apiplatform.api_platform.workspace.exception.WorkspaceNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
