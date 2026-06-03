@@ -380,3 +380,72 @@
   }
 }
 
+/* ── Three-dot menu ── */
+.ws-menu-wrap {
+  position: relative;
+}
+
+.ws-menu-trigger {
+  background: none;
+  border: none;
+  padding: 4px 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+
+.ws-menu-trigger:hover {
+  background: #F3F4F6;
+  color: var(--text);
+}
+
+.ws-menu-dropdown {
+  position: absolute;
+  bottom: calc(100% + 4px);
+  right: 0;
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.10);
+  min-width: 140px;
+  z-index: 100;
+  overflow: hidden;
+  animation: menuFadeIn 0.15s ease;
+}
+
+@keyframes menuFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+
+.ws-menu-item {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.15s;
+  text-align: left;
+}
+
+.ws-menu-item:hover {
+  background: #F9FAFB;
+}
+
+.ws-menu-item--danger {
+  color: #D1242F;
+}
+
+.ws-menu-item--danger:hover {
+  background: rgba(209, 36, 47, 0.06);
+}

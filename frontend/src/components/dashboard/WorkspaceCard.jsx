@@ -26,15 +26,7 @@ function WorkspaceCard({ workspace }) {
   const formatDate = (dateString) => {
     if (!dateString) return "Recently created";
     const date = new Date(dateString);
-    const now = new Date();
-    const diffTime = Math.abs(now - date);
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays === 0) return "Created today";
-    if (diffDays === 1) return "Created yesterday";
-    if (diffDays < 7) return `Created ${diffDays} days ago`;
-    if (diffDays < 30) return `Created ${Math.floor(diffDays / 7)} weeks ago`;
-    return `Created ${Math.floor(diffDays / 30)} months ago`;
+    return "Created " + date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
   };
 
   return (

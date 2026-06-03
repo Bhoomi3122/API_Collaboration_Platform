@@ -23,6 +23,17 @@ export const createWorkspace = async (workspaceData) => {
   return response.data;
 };
 
+// Update (rename) workspace
+export const updateWorkspace = async (workspaceId, workspaceData) => {
+  const response = await apiClient.put(`/workspaces/${workspaceId}`, workspaceData);
+  return response.data;
+};
+
+// Delete workspace by ID
+export const deleteWorkspace = async (workspaceId) => {
+  await apiClient.delete(`/workspaces/${workspaceId}`);
+};
+
 // Get single workspace by ID
 export const getWorkspaceById = async (workspaceId) => {
   const response = await apiClient.get(`/workspaces/${workspaceId}`);

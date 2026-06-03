@@ -36,17 +36,22 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
         String token = authHeader.substring(7);
-        String email = jwtUtil.extractEmail(token);
-        if(jwtUtil.validateToken(token, email))
-        {
-            UsernamePasswordAuthenticationToken authenticationToken =
-                    new UsernamePasswordAuthenticationToken(
-                            email,
-                            null,
-                            new ArrayList<>()
-                    );
-            SecurityContextHolder.getContext()
-                    .setAuthentication(authenticationToken);
+        try {
+            String email = jwtUtil.extractEmail(token);
+            if(jwtUtil.validateToken(token, email))
+            {
+                UsernamePasswordAuthenticationToken authenticationToken =
+                        new UsernamePasswordAuthenticationToken(
+                                email,
+                                null,
+                                new ArrayList<>()
+                        );
+                SecurityContextHolder.getContext()
+                        .setAuthentication(authenticationToken);
+            }
+        } catch (Exception e) {
+            // Invalid or expired token - continue without setting authentication
+            SecurityContextHolder.clearContext();
         }
         filterChain.doFilter(request, response);
     }
