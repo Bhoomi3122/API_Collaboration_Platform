@@ -59,7 +59,7 @@ export const deleteRequest = async (id) => {
   }
 };
 
-// Execute an API request
+// Execute an API request by ID (saved requests via backend)
 export const executeRequest = async (id) => {
   try {
     const response = await apiClient.post(`/requests/${id}/execute`);
@@ -70,3 +70,46 @@ export const executeRequest = async (id) => {
   }
 };
 
+// Execute a request directly (ad-hoc, unsaved) — calls the URL from the browser
+export const executeDirectRequest = async ({ method, url, headers, body }) => {
+  const axios = (await import("axios")).default;
+
+  // Parse headers — accept object or JSON string
+  let parsedHeaders = {};
+  if (headers && typeof headers === "object") {
+    parsedHeaders = headers;
+  } else if (headers && typeof headers === "string" && headers.trim()) {
+    try { parsedHeaders = JSON.parse(headers); } catch { /* ignore */ }
+  }
+
+  const config = {
+    method: method || "GET",
+    url,
+    headers: parsedHeaders,
+  };
+
+  if (body && typeof body === "string" && body.trim() &&
+      ["POST", "PUT", "PATCH"].includes((method || "").toUpperCase())) {
+    try {
+      config.data = JSON.parse(body);
+      if (!parsedHeaders["Content-Type"] && !parsedHeaders["content-type"]) {
+        config.headers["Content-Type"] = "application/json";
+      }
+    } catch {
+      config.data = body;
+    }
+  }
+
+  const start = Date.now();
+  const response = await axios(config);
+  const duration = Date.now() - start;
+
+  return {
+    status: response.status,
+    statusText: response.statusText,
+    duration,
+    size: JSON.stringify(response.data).length,
+    data: response.data,
+    headers: response.headers,
+  };
+};
