@@ -23,13 +23,11 @@ public class ApiExecutionService {
 
     private final RestTemplate restTemplate;
     private final ApiRequestRepository apiRequestRepository;
-    private final ObjectMapper objectMapper;
     private UserRepository userRepository;
 
-    public ApiExecutionService(RestTemplate restTemplate, ApiRequestRepository apiRequestRepository, ObjectMapper objectMapper, UserRepository userRepository) {
+    public ApiExecutionService(RestTemplate restTemplate, ApiRequestRepository apiRequestRepository, UserRepository userRepository) {
         this.restTemplate = restTemplate;
         this.apiRequestRepository = apiRequestRepository;
-        this.objectMapper = objectMapper;
         this.userRepository = userRepository;
     }
 
@@ -86,24 +84,17 @@ public class ApiExecutionService {
         ApiRequest apiRequest = getOwnedApiRequest(requestId);
         String method = apiRequest.getMethod();
         String url = apiRequest.getUrl();
-        String headers = apiRequest.getHeaders();
+        Map<String, String> headers = apiRequest.getHeaders();
         String body = apiRequest.getBody();
         HttpMethod httpMethod = HttpMethod.valueOf(method);
         HttpHeaders httpHeaders = new HttpHeaders();
-        Map<String, String> headerMap = new HashMap<>();
-        if (headers != null && !headers.isBlank()) {
-            try {
-                headerMap = objectMapper.readValue(
-                        headers,
-                        new TypeReference<Map<String, String>>() {}
-                );
-            } catch (Exception e) {
-                throw new RuntimeException("Invalid headers JSON format");
+
+        if (headers != null && !headers.isEmpty()) {
+            for (Map.Entry<String, String> entry : headers.entrySet()) {
+                httpHeaders.set(entry.getKey(), entry.getValue());
             }
         }
-        for (Map.Entry<String, String> entry : headerMap.entrySet()) {
-            httpHeaders.set(entry.getKey(), entry.getValue());
-        }
+
         HttpEntity<String> httpEntity =
                 new HttpEntity<>(body, httpHeaders);
         long startTime = System.currentTimeMillis();

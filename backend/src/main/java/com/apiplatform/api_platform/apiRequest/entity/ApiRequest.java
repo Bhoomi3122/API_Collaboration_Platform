@@ -1,5 +1,6 @@
 package com.apiplatform.api_platform.apiRequest.entity;
 
+import com.apiplatform.api_platform.apiRequest.converter.HeadersConverter;
 import com.apiplatform.api_platform.collection.entity.Collection;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -8,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Entity
 @Table(name = "api_requests")
@@ -34,7 +36,8 @@ public class ApiRequest {
     private String description;
 
     @Column(columnDefinition = "TEXT")
-    private String headers;
+    @Convert(converter = HeadersConverter.class)
+    private Map<String, String> headers;
 
     @Column(columnDefinition = "TEXT")
     private String body;
