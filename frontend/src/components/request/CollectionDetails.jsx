@@ -20,10 +20,13 @@ const MOCK_COLLECTION = {
   name: "User Authentication APIs",
   description:
     "A curated collection of authentication and authorization endpoints.",
-  createdAt: "2 days ago",
-  apiCount: 3,
-  collaboratorCount: 2,
   workspace: "Ecommerce",
+};
+
+const formatDate = (dateString) => {
+  if (!dateString) return null;
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 };
 
 const CollectionDetails = () => {
@@ -346,11 +349,13 @@ const CollectionDetails = () => {
           <h1 className="cd-header-name">{collection?.name || MOCK_COLLECTION.name}</h1>
           <p className="cd-header-description">{collection?.description || MOCK_COLLECTION.description}</p>
           <div className="cd-header-meta">
-            <span>Created {MOCK_COLLECTION.createdAt}</span>
-            <span className="cd-meta-dot">•</span>
-            <span>{requests.length} APIs</span>
-            <span className="cd-meta-dot">•</span>
-            <span>{MOCK_COLLECTION.collaboratorCount} collaborators</span>
+            {formatDate(collection?.createdAt) && (
+              <>
+                <span>Created {formatDate(collection?.createdAt)}</span>
+                <span className="cd-meta-dot">•</span>
+              </>
+            )}
+            <span>{requests.length} {requests.length === 1 ? "API" : "APIs"}</span>
           </div>
         </div>
         <div className="cd-header-actions">

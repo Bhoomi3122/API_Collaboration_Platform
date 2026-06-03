@@ -11,6 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/workspaces")
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"})
 public class WorkspaceController {
     private WorkspaceService workspaceService;
 
@@ -38,5 +39,21 @@ public class WorkspaceController {
     )
     {
         return ResponseEntity.ok().body(workspaceService.getWorkspaceById(id));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<WorkspaceResponse> updateWorkspace(
+            @PathVariable Long id,
+            @RequestBody CreateWorkspaceRequest request)
+    {
+        WorkspaceResponse response = workspaceService.updateWorkspace(id, request);
+        return ResponseEntity.ok().body(response);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteWorkspace(@PathVariable Long id)
+    {
+        workspaceService.deleteWorkspace(id);
+        return ResponseEntity.noContent().build();
     }
 }
