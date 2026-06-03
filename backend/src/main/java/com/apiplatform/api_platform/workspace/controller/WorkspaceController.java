@@ -1,7 +1,7 @@
 package com.apiplatform.api_platform.workspace.controller;
 
-import com.apiplatform.api_platform.workspace.dto.CreateWorkspaceRequest;
-import com.apiplatform.api_platform.workspace.dto.WorkspaceResponse;
+import com.apiplatform.api_platform.workspace.dto.request.CreateWorkspaceRequest;
+import com.apiplatform.api_platform.workspace.dto.response.WorkspaceResponse;
 import com.apiplatform.api_platform.workspace.service.WorkspaceService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

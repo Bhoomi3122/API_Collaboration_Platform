@@ -1,7 +1,7 @@
 package com.apiplatform.api_platform.workspace.entity;
 
 import com.apiplatform.api_platform.auth.entity.User;
-import com.apiplatform.api_platform.workspace.enums.WorkspaceRole;
+import com.apiplatform.api_platform.workspace.enums.InvitationStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,20 +9,15 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(
-        name = "workspace_members",
-        uniqueConstraints = {
-                @UniqueConstraint(
-                        columnNames = {"workspace_id", "user_id"}
-                )
-        }
-)
-public class WorkspaceMember {
+@Table(name = "workspace_invitations")
+public class WorkspaceInvitation {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -32,18 +27,28 @@ public class WorkspaceMember {
     private Workspace workspace;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "invited_user_id", nullable = false)
+    private User invitedUser;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "invited_by_user_id", nullable = false)
+    private User invitedBy;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private WorkspaceRole role;
+    private InvitationStatus status;
+
+    @Column(nullable = false, unique = true)
+    private String token;
 
     @Column(nullable = false, updatable = false)
-    private LocalDateTime joinedAt;
+    private LocalDateTime createdAt;
+
+    @Column(nullable = false)
+    private LocalDateTime expiresAt;
 
     @PrePersist
     protected void onCreate() {
-        this.joinedAt = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now();
     }
 }

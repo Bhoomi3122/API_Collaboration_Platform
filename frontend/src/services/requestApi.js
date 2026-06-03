@@ -86,6 +86,8 @@ export const executeDirectRequest = async ({ method, url, headers, body }) => {
     method: method || "GET",
     url,
     headers: parsedHeaders,
+    // Never throw for any HTTP status — let the caller handle all responses uniformly
+    validateStatus: () => true,
   };
 
   if (body && typeof body === "string" && body.trim() &&

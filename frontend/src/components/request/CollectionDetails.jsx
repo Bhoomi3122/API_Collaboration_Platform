@@ -142,7 +142,7 @@ const CollectionDetails = () => {
       });
     } catch (error) {
       console.error("Execution failed:", error);
-      // HTTP error responses (4xx, 5xx) — show in response viewer with body + headers
+      // HTTP errors with a response body (safety fallback — shouldn't reach here with validateStatus:()=>true)
       if (error.response) {
         const errData = error.response.data;
         setExecutionResponse({
@@ -152,9 +152,11 @@ const CollectionDetails = () => {
           responseHeaders: error.response.headers || {},
         });
       } else {
-        // Network-level failure (no response at all)
+        // True network failure — no HTTP response at all (CORS block, DNS failure, timeout, etc.)
         setExecutionError(
-          error.message || "Network error. Please check your connection and try again."
+          error.code === "ERR_NETWORK"
+            ? "Network error — the request could not be sent. Check the URL, CORS policy, or your connection."
+            : error.message || "Request failed. Please check your connection and try again."
         );
       }
     } finally {
@@ -203,11 +205,22 @@ const CollectionDetails = () => {
         setTimeout(() => setSaveMessage(null), 3000);
       } catch (execError) {
         console.error("Execution failed:", execError);
-        const errorMsg = execError.response?.data?.message
-          || execError.message
-          || "Request saved but execution failed. Please try again.";
-        setExecutionError(errorMsg);
-        setSaveMessage({ type: "success", text: "Request saved. Execution failed." });
+        // If the backend itself returned an HTTP error body, show it as a response
+        if (execError.response) {
+          const errData = execError.response.data;
+          setExecutionResponse({
+            statusCode:      execError.response.status,
+            responseBody:    typeof errData === "string" ? errData : JSON.stringify(errData, null, 2),
+            responseTime:    null,
+            responseHeaders: execError.response.headers || {},
+          });
+          setSaveMessage({ type: "success", text: "Request saved." });
+        } else {
+          setExecutionError(
+            execError.message || "Request saved but execution failed. Please try again."
+          );
+          setSaveMessage({ type: "success", text: "Request saved. Execution failed." });
+        }
         setTimeout(() => setSaveMessage(null), 4000);
       } finally {
         setExecuting(false);

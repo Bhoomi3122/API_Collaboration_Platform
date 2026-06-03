@@ -1,19 +1,15 @@
-package com.apiplatform.api_platform.workspace.dto;
+package com.apiplatform.api_platform.workspace.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
-
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class WorkspaceResponse {
-    private Long id;
+public class CreateWorkspaceRequest {
     private String name;
     private String description;
-    private LocalDateTime createdAt;
 }
