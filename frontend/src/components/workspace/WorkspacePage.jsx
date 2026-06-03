@@ -4,11 +4,13 @@ import { AlertCircle, FolderOpen } from "lucide-react";
 import WorkspaceNavbar from "./WorkspaceNavbar";
 import WorkspaceSidebar from "./WorkspaceSidebar";
 import CollectionList from "./CollectionList";
+import MembersPanel from "./MembersPanel";
 import CreateCollection from "../collection/CreateCollection";
 import EditCollection from "../collection/EditCollection";
 import DeleteConfirmation from "../collection/DeleteConfirmation";
 import { getWorkspaceById, getCollectionsByWorkspace } from "../../services/workspaceApi";
 import "../../styles/workspace.css";
+
 const WorkspacePage = () => {
   const { workspaceId } = useParams();
   const navigate = useNavigate();
@@ -16,13 +18,16 @@ const WorkspacePage = () => {
   const [collections, setCollections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState("collections");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedCollection, setSelectedCollection] = useState(null);
+
   useEffect(() => {
     loadWorkspaceData();
   }, [workspaceId]);
+
   const loadWorkspaceData = async () => {
     try {
       setLoading(true);
@@ -39,9 +44,11 @@ const WorkspacePage = () => {
       setLoading(false);
     }
   };
+
   const handleCreateCollection = () => {
     setShowCreateModal(true);
   };
+
   const handleCollectionCreated = () => {
     loadWorkspaceData();
   };
@@ -65,6 +72,7 @@ const WorkspacePage = () => {
       prevCollections.filter((c) => c.id !== selectedCollection.id)
     );
   };
+
   const renderContent = () => {
     // Loading State
     if (loading) {
@@ -142,19 +150,25 @@ const WorkspacePage = () => {
        </div>
      );
   };
+
   return (
     <div className="workspace-page">
       <WorkspaceNavbar />
       <WorkspaceSidebar
         workspaceName={workspace?.name}
         workspaceDescription={workspace?.description}
-        activeTab="collections"
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
       />
       <main className="workspace-page-main">
         <div className="workspace-page-content">
-          {renderContent()}
+          {activeTab === "collections" && renderContent()}
+          {activeTab === "members" && (
+            <MembersPanel workspaceId={workspaceId} currentUserRole="OWNER" />
+          )}
         </div>
       </main>
+
       {/* Create Collection Modal */}
       <CreateCollection
         isOpen={showCreateModal}
@@ -181,4 +195,5 @@ const WorkspacePage = () => {
     </div>
   );
 };
+
 export default WorkspacePage;

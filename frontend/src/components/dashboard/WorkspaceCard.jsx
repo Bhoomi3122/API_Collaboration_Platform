@@ -15,8 +15,15 @@ const recordVisit = (id) => {
   localStorage.setItem("wsVisits", JSON.stringify(counts));
 };
 
-function WorkspaceCard({ workspace }) {
+function WorkspaceCard({ workspace, role = "OWNER" }) {
   const navigate = useNavigate();
+
+  const ROLE_STYLES = {
+    OWNER:  { bg: "#DCFCE7", color: "#16A34A" },
+    EDITOR: { bg: "#DBEAFE", color: "#2563EB" },
+    VIEWER: { bg: "#EDE9FE", color: "#7C3AED" },
+  };
+  const rs = ROLE_STYLES[role] || ROLE_STYLES.OWNER;
 
   const handleClick = () => {
     recordVisit(workspace.id);
@@ -33,6 +40,9 @@ function WorkspaceCard({ workspace }) {
     <div className="workspace-card" onClick={handleClick}>
       <div className="workspace-header">
         <h4 className="workspace-title-card">{workspace.name}</h4>
+        <span className="ws-role-badge" style={{ background: rs.bg, color: rs.color }}>
+          {role.charAt(0) + role.slice(1).toLowerCase()}
+        </span>
       </div>
       <p className="workspace-description">
         {workspace.description || "No description provided"}

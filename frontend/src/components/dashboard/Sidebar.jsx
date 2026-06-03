@@ -6,6 +6,7 @@ function Sidebar({ activeItem = "Dashboard" }) {
   const menuItems = [
     { name: "Dashboard", icon: "dashboard", path: "/dashboard" },
     { name: "Workspaces", icon: "workspaces", path: "/workspaces" },
+    { name: "Invitations", icon: "team", path: "/invitations" },
     { name: "Settings", icon: "settings", path: "/settings" },
   ];
 
@@ -90,4 +91,3 @@ function Sidebar({ activeItem = "Dashboard" }) {
 }
 
 export default Sidebar;
-

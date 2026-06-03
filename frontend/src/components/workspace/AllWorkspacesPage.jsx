@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Search, Plus, FolderOpen, Calendar, AlertCircle,
   MoreVertical, Trash2, Pencil,
@@ -139,9 +139,22 @@ function DeleteWorkspaceModal({ workspace, onConfirm, onCancel, deleting }) {
   );
 }
 
+// Mock shared workspaces
+const MOCK_SHARED = [
+  { id: "s1", name: "Bhoomi's API Project",   description: "Shared collaboration workspace.", createdAt: "2026-06-01T10:00:00", role: "EDITOR", invitedBy: "Bhoomi Shah"   },
+  { id: "s2", name: "Team Auth Service",       description: "Authentication microservice APIs.", createdAt: "2026-05-30T08:00:00", role: "VIEWER", invitedBy: "Alice Johnson" },
+];
+
+const ROLE_STYLES = {
+  OWNER:  { bg: "#DCFCE7", color: "#16A34A" },
+  EDITOR: { bg: "#DBEAFE", color: "#2563EB" },
+  VIEWER: { bg: "#EDE9FE", color: "#7C3AED" },
+};
+
 // ── Main page ─────────────────────────────────────────────────
 function AllWorkspacesPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [workspaces, setWorkspaces]                 = useState([]);
   const [filteredWorkspaces, setFilteredWorkspaces] = useState([]);
   const [searchQuery, setSearchQuery]               = useState("");
@@ -152,6 +165,10 @@ function AllWorkspacesPage() {
   const [deleting, setDeleting]                     = useState(false);
   const [renameTarget, setRenameTarget]             = useState(null);
   const [renaming, setRenaming]                     = useState(false);
+  const [activeTab, setActiveTab] = useState(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get("tab") === "shared" ? "shared" : "mine";
+  });
 
   useEffect(() => { loadWorkspaces(); }, []);
 
@@ -213,6 +230,48 @@ function AllWorkspacesPage() {
   };
 
   const renderContent = () => {
+    if (activeTab === "shared") {
+      const filtered = searchQuery.trim()
+        ? MOCK_SHARED.filter((w) => w.name.toLowerCase().includes(searchQuery.toLowerCase()))
+        : MOCK_SHARED;
+      if (filtered.length === 0) {
+        return (
+          <div className="workspaces-empty-state">
+            <div className="empty-icon"><Search /></div>
+            <h3 className="empty-title">{searchQuery.trim() ? "No shared workspaces found" : "No shared workspaces"}</h3>
+            <p className="empty-description">{searchQuery.trim() ? "No shared workspaces match your search." : "Workspaces shared with you will appear here."}</p>
+          </div>
+        );
+      }
+      return (
+        <div className="workspaces-grid">
+          {filtered.map((ws) => {
+            const rs = ROLE_STYLES[ws.role] || ROLE_STYLES.VIEWER;
+            return (
+              <div key={ws.id} className="all-workspace-card" onClick={() => navigate(`/workspace/${ws.id}`)}>
+                <div className="workspace-card-top">
+                  <div className="workspace-card-icon"><FolderOpen /></div>
+                  <span className="ws-role-badge" style={{ background: rs.bg, color: rs.color }}>
+                    {ws.role.charAt(0) + ws.role.slice(1).toLowerCase()}
+                  </span>
+                </div>
+                <h3 className="workspace-card-title">{ws.name}</h3>
+                <p className="workspace-card-description">{ws.description || "No description provided"}</p>
+                <div className="workspace-card-footer">
+                  <div className="workspace-card-meta">
+                    <Calendar size={12} />
+                    <span>Created {formatDate(ws.createdAt)}</span>
+                  </div>
+                  <span style={{ fontSize: 11, color: "#9CA3AF" }}>by {ws.invitedBy}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+
+    // "mine" tab
     if (loading) {
       return (
         <div className="workspaces-grid">
@@ -258,12 +317,15 @@ function AllWorkspacesPage() {
       <div className="workspaces-grid">
         {filteredWorkspaces.map((workspace) => (
           <div key={workspace.id} className="all-workspace-card" onClick={() => navigate(`/workspace/${workspace.id}`)}>
-            <div className="workspace-card-icon"><FolderOpen /></div>
+            <div className="workspace-card-top">
+              <div className="workspace-card-icon"><FolderOpen /></div>
+              <span className="ws-role-badge" style={{ background: "#DCFCE7", color: "#16A34A" }}>Owner</span>
+            </div>
             <h3 className="workspace-card-title">{workspace.name}</h3>
             <p className="workspace-card-description">{workspace.description || "No description provided"}</p>
             <div className="workspace-card-footer">
               <div className="workspace-card-meta">
-                <Calendar />
+                <Calendar size={12} />
                 <span>Created {formatDate(workspace.createdAt)}</span>
               </div>
               <WorkspaceMenu
@@ -309,6 +371,24 @@ function AllWorkspacesPage() {
               <h1 className="page-title">Workspaces</h1>
               <p className="page-subtitle">Manage and organize all your API workspaces</p>
             </div>
+          </div>
+
+          {/* ── Tabs ── */}
+          <div className="ws-tabs">
+            <button
+              className={`ws-tab${activeTab === "mine" ? " ws-tab--active" : ""}`}
+              onClick={() => setActiveTab("mine")}
+            >
+              My Workspaces
+              <span className="ws-tab-count">{loading ? "…" : workspaces.length}</span>
+            </button>
+            <button
+              className={`ws-tab${activeTab === "shared" ? " ws-tab--active" : ""}`}
+              onClick={() => setActiveTab("shared")}
+            >
+              Shared With Me
+              <span className="ws-tab-count">{MOCK_SHARED.length}</span>
+            </button>
           </div>
 
           <div className="workspaces-actions-section">

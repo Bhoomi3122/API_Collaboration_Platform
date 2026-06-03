@@ -237,6 +237,26 @@
   letter-spacing: -0.01em;
 }
 
+/* ── Section title group (icon + title + count) ── */
+.section-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-title-icon {
+  font-size: 16px;
+}
+
+.section-count {
+  background: #F3F4F6;
+  color: #6B7280;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
 /* Quick Actions */
 .quick-actions {
   margin-bottom: 40px;
@@ -302,8 +322,9 @@
 }
 
 .workspaces-grid {
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
 }
 
 .workspace-card {
@@ -327,9 +348,10 @@
 
 .workspace-header {
   display: flex;
-  justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 12px;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
 }
 
 .workspace-title-card {
@@ -390,6 +412,21 @@
 .workspace-time {
   font-size: 11px;
   color: var(--text-muted);
+}
+
+.workspace-invited-by {
+  font-size: 11px;
+  color: #9CA3AF;
+}
+
+/* ── Role badge on workspace cards ── */
+.ws-role-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 /* Collections List */
@@ -536,7 +573,7 @@
 /* ── Stats Row ── */
 .stats-row {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
   margin-bottom: 40px;
 }

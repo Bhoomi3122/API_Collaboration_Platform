@@ -6,6 +6,7 @@ import Dashboard from "./components/dashboard/Dashboard";
 import AllWorkspacesPage from "./components/workspace/AllWorkspacesPage";
 import WorkspacePage from "./components/workspace/WorkspacePage";
 import CollectionDetails from "./components/request/CollectionDetails";
+import InvitationsPage from "./components/dashboard/InvitationsPage";
 import { isAuthenticated } from "./utils/auth";
 
 function App() {
@@ -66,6 +67,14 @@ function App() {
           element={
             <ProtectedRoute>
               <CollectionDetails />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/invitations"
+          element={
+            <ProtectedRoute>
+              <InvitationsPage />
             </ProtectedRoute>
           }
         />
