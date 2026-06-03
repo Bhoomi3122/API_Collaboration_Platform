@@ -301,7 +301,7 @@ const RequestEditor = ({ request, onSave, onDelete, onExecute, onSaveAndSend, sa
                 disabled={saving}
                 onClick={() => {
                   setDropdownOpen(false);
-                  if (onSave) onSave({ method, url, headers, body });
+                  if (onSave) onSave({ method, url, headers: parseHeaders(headers), body });
                 }}
               >
                 {saving ? "Saving..." : "Save Request"}
@@ -311,7 +311,7 @@ const RequestEditor = ({ request, onSave, onDelete, onExecute, onSaveAndSend, sa
                 disabled={saving || executing}
                 onClick={() => {
                   setDropdownOpen(false);
-                  if (onSaveAndSend) onSaveAndSend({ method, url, headers, body });
+                  if (onSaveAndSend) onSaveAndSend({ method, url, headers: parseHeaders(headers), body });
                 }}
               >
                 {saving || executing ? "Processing..." : "Save & Send"}

@@ -4,6 +4,7 @@ import { ArrowLeft, Bell, ChevronDown, Share2, Settings, Layers } from "lucide-r
 import ApiSidebar from "./ApiSidebar";
 import RequestEditor from "./RequestEditor";
 import ResponseViewer from "./ResponseViewer";
+import DeleteRequestModal from "./DeleteRequestModal";
 import {
   getRequestsByCollection,
   getRequestById,
@@ -47,6 +48,7 @@ const CollectionDetails = () => {
   const [executing, setExecuting]             = useState(false);
   const [executionResponse, setExecutionResponse] = useState(null);
   const [executionError, setExecutionError]   = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   // ── Load sidebar list ────────────────────────────────────────
   const fetchRequests = async (reselectId = null) => {
@@ -140,10 +142,21 @@ const CollectionDetails = () => {
       });
     } catch (error) {
       console.error("Execution failed:", error);
-      const errorMsg = error.response?.data?.message
-        || error.message
-        || "Network error. Please check your connection and try again.";
-      setExecutionError(errorMsg);
+      // HTTP error responses (4xx, 5xx) — show in response viewer with body + headers
+      if (error.response) {
+        const errData = error.response.data;
+        setExecutionResponse({
+          statusCode:      error.response.status,
+          responseBody:    typeof errData === "string" ? errData : JSON.stringify(errData, null, 2),
+          responseTime:    null,
+          responseHeaders: error.response.headers || {},
+        });
+      } else {
+        // Network-level failure (no response at all)
+        setExecutionError(
+          error.message || "Network error. Please check your connection and try again."
+        );
+      }
     } finally {
       setExecuting(false);
     }
@@ -242,22 +255,19 @@ const CollectionDetails = () => {
   };
 
   // ── Delete ───────────────────────────────────────────────────
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!selectedRequest?.id) return;
-    const confirmed = window.confirm(
-      `Delete "${selectedRequest.name || "this request"}"? This cannot be undone.`
-    );
-    if (!confirmed) return;
+    setShowDeleteModal(true);
+  };
 
+  const handleDeleteSuccess = async () => {
     try {
-      await deleteRequest(selectedRequest.id);
       const data = await getRequestsByCollection(collectionId);
       setRequests(data);
       if (data.length > 0) await handleSelectRequest(data[0].id, false);
       else setSelectedRequest(null);
     } catch (error) {
-      console.error("Delete failed:", error);
-      alert("Failed to delete request. Please try again.");
+      console.error("Failed to refresh requests after delete:", error);
     }
   };
 
@@ -422,6 +432,15 @@ const CollectionDetails = () => {
         </div>
 
       </div>
+
+      {/* ── Delete Request Modal ─────────────────── */}
+      <DeleteRequestModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        request={selectedRequest}
+        onSuccess={handleDeleteSuccess}
+      />
+
     </div>
   );
 };

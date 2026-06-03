@@ -156,7 +156,7 @@ const ResponseViewer = ({ response, loading, error }) => {
             >
               ● {statusCode} {statusText}
             </span>
-            <span className="cd-response-time">{responseTime} ms</span>
+            <span className="cd-response-time">{responseTime != null ? `${responseTime} ms` : "—"}</span>
           </div>
 
           {/* Response body */}
