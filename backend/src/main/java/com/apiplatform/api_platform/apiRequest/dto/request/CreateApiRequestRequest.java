@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Map;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -24,7 +26,7 @@ public class CreateApiRequestRequest {
 
     private String description;
 
-    private String headers;
+    private Map<String, String> headers;
 
     private String body;
 

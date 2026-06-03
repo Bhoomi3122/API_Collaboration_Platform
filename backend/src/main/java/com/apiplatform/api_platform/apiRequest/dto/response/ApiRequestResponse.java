@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -18,7 +19,7 @@ public class ApiRequestResponse {
     private String method;
     private String url;
     private String description;
-    private String headers;
+    private Map<String, String> headers;
     private String body;
     private Long collectionId;
     private LocalDateTime createdAt;

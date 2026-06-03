@@ -1,5 +1,7 @@
 package com.apiplatform.api_platform.apiRequest.service;
 
+import com.apiplatform.api_platform.auth.entity.User;
+import com.apiplatform.api_platform.auth.repository.UserRepository;
 import com.apiplatform.api_platform.collection.entity.Collection;
 import com.apiplatform.api_platform.collection.repository.CollectionRepository;
 import com.apiplatform.api_platform.exception.ResourceNotFoundException;
@@ -8,6 +10,7 @@ import com.apiplatform.api_platform.apiRequest.dto.response.ApiRequestResponse;
 import com.apiplatform.api_platform.apiRequest.entity.ApiRequest;
 import com.apiplatform.api_platform.apiRequest.exception.ApiRequestNotFoundException;
 import com.apiplatform.api_platform.apiRequest.repository.ApiRequestRepository;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,11 +21,50 @@ public class ApiRequestService {
 
     private final ApiRequestRepository apiRequestRepository;
     private final CollectionRepository collectionRepository;
+    private final UserRepository userRepository;
 
     public ApiRequestService(ApiRequestRepository apiRequestRepository,
-                             CollectionRepository collectionRepository) {
+                             CollectionRepository collectionRepository,
+                             UserRepository userRepository) {
         this.apiRequestRepository = apiRequestRepository;
         this.collectionRepository = collectionRepository;
+        this.userRepository = userRepository;
+    }
+
+    // ── Helper: Get currently authenticated user ──────────────────────────────────────────
+
+    private User getCurrentUser() {
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        return userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("User not found"));
+    }
+
+    // ── Helper: Verify collection ownership ──────────────────────────────────────────────
+
+    private Collection getOwnedCollection(Long collectionId) {
+        Collection collection = collectionRepository.findById(collectionId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Collection not found with id: " + collectionId
+                        ));
+
+        User currentUser = getCurrentUser();
+
+        if (!collection.getWorkspace()
+                .getOwner()
+                .getId()
+                .equals(currentUser.getId())) {
+
+            throw new ResourceNotFoundException(
+                    "Collection not found with id: " + collectionId
+            );
+        }
+
+        return collection;
     }
 
     // ── Helper: entity → response DTO ──────────────────────────────────────────
@@ -44,9 +86,8 @@ public class ApiRequestService {
     // ── Create a new API request ────────────────────────────────────────────────
 
     public ApiRequestResponse createRequest(CreateApiRequestRequest request) {
-        Collection collection = collectionRepository.findById(request.getCollectionId())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Collection not found with id: " + request.getCollectionId()));
+        // Verify ownership before creating
+        Collection collection = getOwnedCollection(request.getCollectionId());
 
         ApiRequest apiRequest = new ApiRequest();
         apiRequest.setName(request.getName());
@@ -64,9 +105,8 @@ public class ApiRequestService {
     // ── Get all requests for a collection ──────────────────────────────────────
 
     public List<ApiRequestResponse> getRequestsByCollection(Long collectionId) {
-        Collection collection = collectionRepository.findById(collectionId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Collection not found with id: " + collectionId));
+        // Verify ownership before fetching
+        Collection collection = getOwnedCollection(collectionId);
 
         List<ApiRequest> requests = apiRequestRepository.findByCollection(collection);
 
@@ -82,6 +122,16 @@ public class ApiRequestService {
                 .orElseThrow(() -> new ApiRequestNotFoundException(
                         "API request not found with id: " + id));
 
+        // Verify ownership
+        User currentUser = getCurrentUser();
+        if (!apiRequest.getCollection().getWorkspace()
+                .getOwner()
+                .getId()
+                .equals(currentUser.getId())) {
+            throw new ApiRequestNotFoundException(
+                    "API request not found with id: " + id);
+        }
+
         return convertToResponse(apiRequest);
     }
 
@@ -92,11 +142,19 @@ public class ApiRequestService {
                 .orElseThrow(() -> new ApiRequestNotFoundException(
                         "API request not found with id: " + id));
 
-        // Validate new collection if collectionId has changed
+        // Verify ownership of existing request
+        User currentUser = getCurrentUser();
+        if (!existing.getCollection().getWorkspace()
+                .getOwner()
+                .getId()
+                .equals(currentUser.getId())) {
+            throw new ApiRequestNotFoundException(
+                    "API request not found with id: " + id);
+        }
+
+        // Validate new collection if collectionId has changed (and verify ownership)
         if (!existing.getCollection().getId().equals(request.getCollectionId())) {
-            Collection collection = collectionRepository.findById(request.getCollectionId())
-                    .orElseThrow(() -> new ResourceNotFoundException(
-                            "Collection not found with id: " + request.getCollectionId()));
+            Collection collection = getOwnedCollection(request.getCollectionId());
             existing.setCollection(collection);
         }
 
@@ -117,6 +175,16 @@ public class ApiRequestService {
         ApiRequest apiRequest = apiRequestRepository.findById(id)
                 .orElseThrow(() -> new ApiRequestNotFoundException(
                         "API request not found with id: " + id));
+
+        // Verify ownership before deleting
+        User currentUser = getCurrentUser();
+        if (!apiRequest.getCollection().getWorkspace()
+                .getOwner()
+                .getId()
+                .equals(currentUser.getId())) {
+            throw new ApiRequestNotFoundException(
+                    "API request not found with id: " + id);
+        }
 
         apiRequestRepository.delete(apiRequest);
     }

@@ -202,7 +202,7 @@ const RequestEditor = ({ request, onSave, onDelete, onExecute, onSaveAndSend, sa
   const [activeTab, setActiveTab] = useState("Body");
   const [body, setBody]           = useState(request?.body   || "");
   const [scripts, setScripts]     = useState("");
-  const [headers, setHeaders]     = useState(request?.headers || "");
+  const [headers, setHeaders]     = useState(request?.headers || {});
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -212,7 +212,7 @@ const RequestEditor = ({ request, onSave, onDelete, onExecute, onSaveAndSend, sa
       setMethod(request.method || "GET");
       setUrl(request.url || "");
       setBody(request.body || "");
-      setHeaders(request.headers || "");
+      setHeaders(request.headers || {});
       setActiveTab("Body");
     }
   }, [request?.id]);
@@ -228,6 +228,24 @@ const RequestEditor = ({ request, onSave, onDelete, onExecute, onSaveAndSend, sa
   }, []);
 
   const methodStyle = METHOD_COLORS[method] || METHOD_COLORS.GET; // kept for badge use
+
+  // Helper function to ensure headers are always sent as an object
+  const parseHeaders = (headers) => {
+    if (typeof headers === "object" && headers !== null && !Array.isArray(headers)) {
+      return headers;
+    }
+    if (typeof headers === "string" && headers.trim()) {
+      try {
+        const parsed = JSON.parse(headers);
+        if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)) {
+          return parsed;
+        }
+      } catch {
+        // Invalid JSON, return empty object
+      }
+    }
+    return {};
+  };
 
   return (
     <div className="cd-editor">
@@ -262,7 +280,7 @@ const RequestEditor = ({ request, onSave, onDelete, onExecute, onSaveAndSend, sa
           <button
             className="cd-send-btn"
             onClick={() => {
-              if (onExecute) onExecute({ method, url, headers, body });
+              if (onExecute) onExecute({ method, url, headers: parseHeaders(headers), body });
             }}
             disabled={executing || !url.trim()}
           >
@@ -283,7 +301,7 @@ const RequestEditor = ({ request, onSave, onDelete, onExecute, onSaveAndSend, sa
                 disabled={saving}
                 onClick={() => {
                   setDropdownOpen(false);
-                  if (onSave) onSave({ method, url, headers, body });
+                  if (onSave) onSave({ method, url, headers: parseHeaders(headers), body });
                 }}
               >
                 {saving ? "Saving..." : "Save Request"}
@@ -293,7 +311,7 @@ const RequestEditor = ({ request, onSave, onDelete, onExecute, onSaveAndSend, sa
                 disabled={saving || executing}
                 onClick={() => {
                   setDropdownOpen(false);
-                  if (onSaveAndSend) onSaveAndSend({ method, url, headers, body });
+                  if (onSaveAndSend) onSaveAndSend({ method, url, headers: parseHeaders(headers), body });
                 }}
               >
                 {saving || executing ? "Processing..." : "Save & Send"}
@@ -305,7 +323,7 @@ const RequestEditor = ({ request, onSave, onDelete, onExecute, onSaveAndSend, sa
                   disabled={saving}
                   onClick={() => {
                     setDropdownOpen(false);
-                    if (onSave) onSave({ method, url, headers, body });
+                    if (onSave) onSave({ method, url, headers: parseHeaders(headers), body });
                   }}
                 >
                   {saving ? "Updating..." : "Update Request"}
@@ -360,20 +378,13 @@ const RequestEditor = ({ request, onSave, onDelete, onExecute, onSaveAndSend, sa
         {activeTab === "Authorization" && <AuthTab />}
 
         {activeTab === "Headers" && (
-          headers ? (
-            <textarea
-              className="cd-textarea"
-              placeholder="Headers (key: value)"
-              value={typeof headers === "object" ? JSON.stringify(headers, null, 2) : headers}
-              onChange={(e) => setHeaders(e.target.value)}
-              rows={7}
-            />
-          ) : (
-            <KVTable
-              colHeaders={["Key", "Value"]}
-              placeholder={["Content-Type", "application/json"]}
-            />
-          )
+          <textarea
+            className="cd-textarea"
+            placeholder='{\n  "Content-Type": "application/json"\n}'
+            value={typeof headers === "object" ? JSON.stringify(headers, null, 2) : headers}
+            onChange={(e) => setHeaders(e.target.value)}
+            rows={7}
+          />
         )}
 
         {activeTab === "Body" && (
