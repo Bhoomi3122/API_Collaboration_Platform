@@ -11,6 +11,7 @@ import {
   updateRequest,
   deleteRequest,
   executeRequest,
+  executeDirectRequest,
 } from "../../services/requestApi";
 import { getCollectionById, getWorkspaceById } from "../../services/workspaceApi";
 import "../../styles/collectionDetails.css";
@@ -109,16 +110,34 @@ const CollectionDetails = () => {
   };
 
   // ── Execute request ───────────────────────────────────────────
-  const handleExecute = async () => {
-    if (!selectedRequest?.id) return;
-
+  const handleExecute = async (editorState) => {
     setExecuting(true);
     setExecutionError(null);
     setExecutionResponse(null);
 
     try {
-      const result = await executeRequest(selectedRequest.id);
-      setExecutionResponse(result);
+      const payload = editorState || {
+        method:  selectedRequest?.method  || "GET",
+        url:     selectedRequest?.url     || "",
+        headers: selectedRequest?.headers || {},
+        body:    selectedRequest?.body    || "",
+      };
+
+      if (!payload.url?.trim()) {
+        setExecutionError("Please enter a URL before sending.");
+        return;
+      }
+
+      // Always execute directly from the browser (works for both saved and unsaved requests)
+      const result = await executeDirectRequest(payload);
+
+      // Normalize to the format ResponseViewer expects
+      setExecutionResponse({
+        statusCode:      result.status,
+        responseBody:    typeof result.data === "string" ? result.data : JSON.stringify(result.data, null, 2),
+        responseTime:    result.duration,
+        responseHeaders: result.headers,
+      });
     } catch (error) {
       console.error("Execution failed:", error);
       const errorMsg = error.response?.data?.message

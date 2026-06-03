@@ -262,9 +262,9 @@ const RequestEditor = ({ request, onSave, onDelete, onExecute, onSaveAndSend, sa
           <button
             className="cd-send-btn"
             onClick={() => {
-              if (onExecute && request?.id) onExecute();
+              if (onExecute) onExecute({ method, url, headers, body });
             }}
-            disabled={executing || !request?.id}
+            disabled={executing || !url.trim()}
           >
             {executing ? "Sending..." : "Send"}
           </button>
