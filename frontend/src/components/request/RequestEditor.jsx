@@ -196,7 +196,7 @@ const SettingsTab = () => {
 // ── Method colour map (matches design spec) ─────────────────
 
 // ── RequestEditor (main export) ─────────────────────────────────
-const RequestEditor = ({ request, onSave, onDelete, onExecute, saving = false, saveMessage = null, executing = false }) => {
+const RequestEditor = ({ request, onSave, onDelete, onExecute, onSaveAndSend, saving = false, saveMessage = null, executing = false }) => {
   const [method, setMethod]       = useState(request?.method || "GET");
   const [url, setUrl]             = useState(request?.url    || "");
   const [activeTab, setActiveTab] = useState("Body");
@@ -290,9 +290,13 @@ const RequestEditor = ({ request, onSave, onDelete, onExecute, saving = false, s
               </button>
               <button
                 className="cd-send-dropdown-item"
-                onClick={() => { console.log("Save & Send clicked"); setDropdownOpen(false); }}
+                disabled={saving || executing}
+                onClick={() => {
+                  setDropdownOpen(false);
+                  if (onSaveAndSend) onSaveAndSend({ method, url, headers, body });
+                }}
               >
-                Save &amp; Send
+                {saving || executing ? "Processing..." : "Save & Send"}
               </button>
               {/* Update Request — only for existing saved requests */}
               {request?.id && (

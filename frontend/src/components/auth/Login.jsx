@@ -1,12 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { login } from "../../services/authApi";
 import { validateEmail, validatePassword } from "../../utils/validators";
+import { isAuthenticated } from "../../utils/auth";
 import "../../styles/variables.css";
 import "../../styles/login.css";
 
 function Login() {
   const navigate = useNavigate();
+
+  // Redirect to dashboard if already authenticated
+  useEffect(() => {
+    if (isAuthenticated()) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [navigate]);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

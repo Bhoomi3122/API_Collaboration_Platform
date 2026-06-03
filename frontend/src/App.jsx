@@ -1,25 +1,73 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Signup from "./components/auth/Signup";
 import Login from "./components/auth/Login";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Dashboard from "./components/dashboard/Dashboard";
 import AllWorkspacesPage from "./components/workspace/AllWorkspacesPage";
 import WorkspacePage from "./components/workspace/WorkspacePage";
 import CollectionDetails from "./components/request/CollectionDetails";
+import { isAuthenticated } from "./utils/auth";
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Signup />} />
+        {/* Root path - redirect based on authentication */}
+        <Route
+          path="/"
+          element={
+            isAuthenticated() ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+
+        {/* Public routes */}
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/workspaces" element={<AllWorkspacesPage />} />
-        <Route path="/workspace/:workspaceId" element={<WorkspacePage />} />
-        <Route path="/collection/:collectionId" element={<CollectionDetails />} />
+
+        {/* Protected routes */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/workspaces"
+          element={
+            <ProtectedRoute>
+              <AllWorkspacesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/workspace/:workspaceId"
+          element={
+            <ProtectedRoute>
+              <WorkspacePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/collection/:collectionId"
+          element={
+            <ProtectedRoute>
+              <CollectionDetails />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/collection-test"
-          element={<CollectionDetails />}
+          element={
+            <ProtectedRoute>
+              <CollectionDetails />
+            </ProtectedRoute>
+          }
         />
       </Routes>
     </Router>

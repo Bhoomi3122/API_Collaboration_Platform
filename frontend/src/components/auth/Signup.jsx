@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { signup } from "../../services/authApi";
+import { isAuthenticated } from "../../utils/auth";
 import "../../styles/variables.css";
 import "../../styles/Signup.css";
 
@@ -28,6 +29,13 @@ function validateForm(form) {
 
 export default function Signup() {
   const navigate = useNavigate();
+
+  // Redirect to dashboard if already authenticated
+  useEffect(() => {
+    if (isAuthenticated()) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [navigate]);
   const [form, setForm] = useState({
     name: "",
     email: "",

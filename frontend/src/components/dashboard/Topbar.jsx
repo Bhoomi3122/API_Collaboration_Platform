@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { clearAuth } from "../../utils/auth";
 
 function Topbar() {
   const navigate = useNavigate();
@@ -11,10 +12,8 @@ function Topbar() {
   const avatarLetter = displayName.charAt(0).toUpperCase();
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("userEmail");
-    localStorage.removeItem("userName");
-    navigate("/login");
+    clearAuth();
+    navigate("/login", { replace: true });
   };
 
   return (

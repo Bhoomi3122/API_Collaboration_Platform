@@ -127,6 +127,65 @@ const CollectionDetails = () => {
     }
   };
 
+  // ── Save and Send (save first, then execute) ──────────────────
+  const handleSaveAndSend = async (editorState) => {
+    // First save the request
+    setSaving(true);
+    setSaveMessage(null);
+    setExecutionError(null);
+    setExecutionResponse(null);
+
+    try {
+      const payload = {
+        name:         editorState.name || selectedRequest?.name || "Untitled Request",
+        method:       editorState.method,
+        url:          editorState.url,
+        headers:      editorState.headers,
+        body:         editorState.body,
+        collectionId: Number(collectionId),
+      };
+
+      let saved;
+      if (selectedRequest?.id) {
+        saved = await updateRequest(selectedRequest.id, payload);
+      } else {
+        saved = await createRequest(payload);
+      }
+
+      setSaveMessage({ type: "success", text: "Request saved successfully." });
+
+      // Reload the request list to get the updated request
+      await fetchRequests(saved.id);
+
+      // Now execute the saved request
+      setExecuting(true);
+      setSaving(false);
+
+      try {
+        const result = await executeRequest(saved.id);
+        setExecutionResponse(result);
+        // Keep the success message visible
+        setTimeout(() => setSaveMessage(null), 3000);
+      } catch (execError) {
+        console.error("Execution failed:", execError);
+        const errorMsg = execError.response?.data?.message
+          || execError.message
+          || "Request saved but execution failed. Please try again.";
+        setExecutionError(errorMsg);
+        setSaveMessage({ type: "success", text: "Request saved. Execution failed." });
+        setTimeout(() => setSaveMessage(null), 4000);
+      } finally {
+        setExecuting(false);
+      }
+
+    } catch (error) {
+      console.error("Save failed:", error);
+      setSaveMessage({ type: "error", text: "Failed to save request. Please try again." });
+      setTimeout(() => setSaveMessage(null), 4000);
+      setSaving(false);
+    }
+  };
+
   // ── Save (create or update) ──────────────────────────────────
   const handleSave = async (editorState) => {
     setSaving(true);
@@ -222,6 +281,7 @@ const CollectionDetails = () => {
             onSave={handleSave}
             onDelete={handleDelete}
             onExecute={handleExecute}
+            onSaveAndSend={handleSaveAndSend}
             saving={saving}
             saveMessage={saveMessage}
             executing={executing}
