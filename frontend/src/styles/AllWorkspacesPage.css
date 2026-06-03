@@ -339,6 +339,72 @@
   background: rgba(47, 129, 247, 0.04);
 }
 
+/* ── Workspace tabs ── */
+.ws-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 24px;
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 0;
+}
+
+.ws-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ws-tab:hover {
+  color: var(--text);
+}
+
+.ws-tab--active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+
+.ws-tab-count {
+  background: #F3F4F6;
+  color: #6B7280;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 20px;
+}
+
+.ws-tab--active .ws-tab-count {
+  background: #DBEAFE;
+  color: var(--primary);
+}
+
+/* ── workspace card top row (icon + role badge) ── */
+.workspace-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+/* role badge */
+.ws-role-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
 /* Responsive Design */
 @media (max-width: 1200px) {
   .workspaces-grid {

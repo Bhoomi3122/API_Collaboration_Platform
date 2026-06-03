@@ -1,27 +1,29 @@
-import { Folder, FolderKanban, Activity, Settings, ArrowLeft } from "lucide-react";
+import { Folder, FolderKanban, Activity, Settings, ArrowLeft, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/workspace.css";
 const WorkspaceSidebar = ({
   workspaceName = "My Workspace",
   workspaceDescription = "",
   activeTab = "collections",
+  onTabChange = () => {},
 }) => {
   const navigate = useNavigate();
   const navItems = [
     { id: "collections", label: "Collections", icon: FolderKanban },
+    { id: "members", label: "Members", icon: Users },
     { id: "activity", label: "Activity", icon: Activity },
     { id: "settings", label: "Settings", icon: Settings },
   ];
   return (
     <aside className="workspace-sidebar">
-      {/* Dashboard Navigation */}
+      {/* Back Navigation */}
       <button
         className="sidebar-dashboard-btn"
-        onClick={() => navigate("/dashboard")}
-        title="Back to Dashboard"
+        onClick={() => navigate("/workspaces")}
+        title="Back to Workspaces"
       >
         <ArrowLeft />
-        <span>Dashboard</span>
+        <span>Workspaces</span>
       </button>
       {/* Workspace Info Card */}
       <div className="sidebar-workspace-card">
@@ -40,7 +42,11 @@ const WorkspaceSidebar = ({
           return (
             <div
               key={item.id}
-              className={`sidebar-nav-item ${activeTab === item.id ? "active" : ""}`}
+              className={`sidebar-nav-item ${
+                activeTab === item.id ? "active" : ""
+              }`}
+              onClick={() => onTabChange(item.id)}
+              style={{ cursor: "pointer" }}
             >
               <Icon />
               <span>{item.label}</span>
