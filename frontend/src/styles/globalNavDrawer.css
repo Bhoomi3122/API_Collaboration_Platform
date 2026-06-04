@@ -1,0 +1,153 @@
+/* ===========================
+   GLOBAL NAV DRAWER (Overlay)
+   =========================== */
+
+/* Backdrop */
+.gnd-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.gnd-backdrop--visible {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* Drawer panel */
+.gnd-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 260px;
+  background: #ffffff;
+  border-right: 1px solid #E5E7EB;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(-100%);
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.1);
+}
+
+.gnd-drawer--open {
+  transform: translateX(0);
+}
+
+/* Header */
+.gnd-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 16px;
+  border-bottom: 1px solid #E5E7EB;
+  min-height: 61px;
+}
+
+.gnd-logo-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.gnd-logo-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.gnd-close-btn {
+  background: none;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6B7280;
+  transition: background 0.2s, color 0.2s;
+}
+
+.gnd-close-btn:hover {
+  background: #F3F4F6;
+  color: #111827;
+}
+
+.gnd-close-btn svg {
+  stroke: currentColor;
+}
+
+/* Nav section */
+.gnd-nav {
+  padding: 16px 10px;
+  flex: 1;
+}
+
+.gnd-nav-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #9CA3AF;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0 8px;
+  margin-bottom: 8px;
+}
+
+.gnd-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.15s;
+  color: #374151;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.gnd-nav-item:hover {
+  background: #F3F4F6;
+  color: #111827;
+}
+
+.gnd-nav-item--active {
+  background: #EFF6FF;
+  color: #2563EB;
+}
+
+.gnd-nav-item--active .gnd-nav-icon svg {
+  stroke: #2563EB;
+}
+
+.gnd-nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.gnd-nav-icon svg {
+  stroke: currentColor;
+}
+
+.gnd-nav-text {
+  flex: 1;
+}
+
+.gnd-active-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #2563EB;
+  flex-shrink: 0;
+}
+

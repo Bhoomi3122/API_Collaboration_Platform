@@ -131,6 +131,32 @@ html, body, #root {
   color: var(--cd-text);
 }
 
+/* Hamburger button in collection details navbar */
+.cd-navbar-hamburger {
+  width: 34px;
+  height: 34px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--cd-text-medium);
+  margin-right: 6px;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.cd-navbar-hamburger:hover {
+  background: var(--cd-bg);
+  color: #2563EB;
+}
+
+.cd-navbar-hamburger svg {
+  stroke: currentColor;
+}
+
 .cd-navbar-profile {
   display: flex;
   align-items: center;

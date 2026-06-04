@@ -286,6 +286,32 @@
   color: var(--ws-text);
 }
 
+/* Hamburger/home button in workspace navbar */
+.navbar-hamburger-btn {
+  width: 34px;
+  height: 34px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--ws-text-secondary);
+  margin-right: 4px;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.navbar-hamburger-btn:hover {
+  background: var(--ws-sidebar-bg);
+  color: var(--ws-primary);
+}
+
+.navbar-hamburger-btn svg {
+  stroke: currentColor;
+}
+
 .navbar-profile {
   display: flex;
   align-items: center;
@@ -440,7 +466,73 @@
   background: var(--ws-primary);
   border-radius: 0 2px 2px 0;
 }
-/* Dashboard Navigation Button */
+/* ── Workspace Sidebar Header (back arrow + name) ── */
+.ws-sidebar-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 16px 14px 14px;
+  border-bottom: 1px solid var(--ws-border);
+  margin-bottom: 8px;
+}
+
+.ws-sidebar-back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  margin-top: 1px;
+  background: transparent;
+  border: 1px solid var(--ws-border);
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--ws-text-secondary);
+  flex-shrink: 0;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.ws-sidebar-back-btn:hover {
+  background: var(--ws-card);
+  border-color: var(--ws-border-hover);
+  color: var(--ws-primary);
+}
+
+.ws-sidebar-back-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.ws-sidebar-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+}
+
+.ws-sidebar-workspace-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ws-text);
+  margin: 0;
+  line-height: 1.3;
+  word-break: break-word;
+  letter-spacing: -0.01em;
+}
+
+.ws-sidebar-workspace-desc {
+  font-size: 11px;
+  color: var(--ws-text-muted);
+  margin: 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Dashboard Navigation Button — kept for reference but no longer rendered */
 .sidebar-dashboard-btn {
   display: flex;
   align-items: center;
@@ -467,49 +559,14 @@
   height: 14px;
   flex-shrink: 0;
 }
-/* Workspace Info Card */
+/* Workspace Info Card — no longer rendered, kept for safety */
 .sidebar-workspace-card {
-  background: var(--ws-card);
-  border: 1px solid var(--ws-border);
-  border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  display: none;
 }
-.workspace-card-icon {
-  width: 32px;
-  height: 32px;
-  background: var(--ws-sidebar-bg);
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--ws-text-secondary);
-  flex-shrink: 0;
-}
-.workspace-card-icon svg {
-  width: 16px;
-  height: 16px;
-}
-.workspace-card-name {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--ws-text);
-  margin: 0;
-  line-height: 1.3;
-  word-break: break-word;
-}
+.workspace-card-icon,
+.workspace-card-name,
 .workspace-card-description {
-  font-size: 11px;
-  color: var(--ws-text-muted);
-  margin: 0;
-  line-height: 1.4;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  display: none;
 }
 /* Main Content Wrapper */
 .workspace-main-content {

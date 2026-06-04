@@ -55,21 +55,21 @@ function Dashboard() {
     }
   };
 
-  // Sort by most visited (desc), top 2
+  // Sort by most visited (desc), top 3
   const recentOwned = [...workspaces]
     .sort((a, b) => {
       const counts = getVisitCounts();
       return (counts[b.id] || 0) - (counts[a.id] || 0);
     })
-    .slice(0, 2);
+    .slice(0, 3);
 
-  // Top 2 most visited shared workspaces
+  // Top 3 most visited shared workspaces
   const recentShared = [...MOCK_SHARED]
     .sort((a, b) => {
       const counts = getVisitCounts();
       return (counts[b.id] || 0) - (counts[a.id] || 0);
     })
-    .slice(0, 2);
+    .slice(0, 3);
 
   const formatDate = (d) => {
     if (!d) return "Recently";
@@ -123,7 +123,7 @@ function Dashboard() {
                 <h3 className="section-title">My Workspaces</h3>
                 <span className="section-count">{loading ? "" : workspaces.length}</span>
               </div>
-              {workspaces.length > 2 && (
+              {workspaces.length > 3 && (
                 <button className="view-all-btn" onClick={() => navigate("/workspaces")}>
                   View all &rarr;
                 </button>

@@ -1,4 +1,4 @@
-import { Folder, FolderKanban, Activity, Settings, ArrowLeft, Users } from "lucide-react";
+import { FolderKanban, Activity, Settings, ArrowLeft, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/workspace.css";
 const WorkspaceSidebar = ({
@@ -16,26 +16,23 @@ const WorkspaceSidebar = ({
   ];
   return (
     <aside className="workspace-sidebar">
-      {/* Back Navigation */}
-      <button
-        className="sidebar-dashboard-btn"
-        onClick={() => navigate("/workspaces")}
-        title="Back to Workspaces"
-      >
-        <ArrowLeft />
-        <span>Workspaces</span>
-      </button>
-      {/* Workspace Info Card */}
-      <div className="sidebar-workspace-card">
-        <div className="workspace-card-icon">
-          <Folder />
+      {/* ── Workspace Header (back arrow + name) ── */}
+      <div className="ws-sidebar-header">
+        <button
+          className="ws-sidebar-back-btn"
+          onClick={() => navigate("/workspaces")}
+          title="Back to Workspaces"
+        >
+          <ArrowLeft size={14} />
+        </button>
+        <div className="ws-sidebar-title-group">
+          <h2 className="ws-sidebar-workspace-name">{workspaceName}</h2>
+          {workspaceDescription && (
+            <p className="ws-sidebar-workspace-desc">{workspaceDescription}</p>
+          )}
         </div>
-        <h3 className="workspace-card-name">{workspaceName}</h3>
-        {workspaceDescription && (
-          <p className="workspace-card-description">{workspaceDescription}</p>
-        )}
       </div>
-      {/* Navigation Items */}
+      {/* ── Navigation Items ── */}
       <nav className="sidebar-nav">
         {navItems.map((item) => {
           const Icon = item.icon;
