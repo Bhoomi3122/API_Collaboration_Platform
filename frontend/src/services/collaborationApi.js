@@ -8,8 +8,8 @@ import apiClient from "./apiClient";
 // ── Invitations ──────────────────────────────────────────────────────────────
 
 // Invite a member to a workspace
-export const inviteMember = async (workspaceId, email) => {
-  const response = await apiClient.post(`/workspaces/${workspaceId}/invite`, { email });
+export const inviteMember = async (workspaceId, email, role = "VIEWER") => {
+  const response = await apiClient.post(`/workspaces/${workspaceId}/invite`, { email, role });
   return response.data;
 };
 

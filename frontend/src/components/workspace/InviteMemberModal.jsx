@@ -29,7 +29,7 @@ const InviteMemberModal = ({ isOpen, onClose, workspaceId, onInviteSuccess }) =>
     setError("");
 
     try {
-      await inviteMember(workspaceId, email.trim());
+      await inviteMember(workspaceId, email.trim(), role);
       setSuccess(true);
 
       setTimeout(() => {

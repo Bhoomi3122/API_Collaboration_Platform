@@ -1,6 +1,7 @@
 package com.apiplatform.api_platform.workspace.dto.response;
 
 import com.apiplatform.api_platform.workspace.enums.InvitationStatus;
+import com.apiplatform.api_platform.workspace.enums.WorkspaceRole;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,9 +15,11 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class InvitationResponse {
     private Long id;
+    private Long workspaceId;
     private String workspaceName;
     private String invitedByName;
     private String invitedEmail;
+    private WorkspaceRole role;
     private InvitationStatus status;
     private LocalDateTime createdAt;
     private LocalDateTime expiresAt;

@@ -27,18 +27,21 @@ public class WorkspaceInvitationService {
     private WorkspaceMemberRepository workspaceMemberRepository;
     private UserRepository userRepository;
     private WorkspacePermissionService workspacePermissionService;
+    private EmailService emailService;
 
     public WorkspaceInvitationService(WorkspaceRepository workspaceRepository,
                                       WorkspaceInvitationRepository workspaceInvitationRepository,
                                       WorkspaceMemberRepository workspaceMemberRepository,
                                       UserRepository userRepository,
-                                      WorkspacePermissionService workspacePermissionService)
+                                      WorkspacePermissionService workspacePermissionService,
+                                      EmailService emailService)
     {
         this.workspaceRepository = workspaceRepository;
         this.workspaceInvitationRepository = workspaceInvitationRepository;
         this.workspaceMemberRepository = workspaceMemberRepository;
         this.userRepository = userRepository;
         this.workspacePermissionService = workspacePermissionService;
+        this.emailService = emailService;
     }
 
     private InvitationResponse convertToResponse(
@@ -50,6 +53,10 @@ public class WorkspaceInvitationService {
 
         response.setId(invitation.getId());
 
+        response.setWorkspaceId(
+                invitation.getWorkspace().getId()
+        );
+
         response.setWorkspaceName(
                 invitation.getWorkspace().getName()
         );
@@ -60,6 +67,10 @@ public class WorkspaceInvitationService {
 
         response.setInvitedEmail(
                 invitation.getInvitedUser().getEmail()
+        );
+
+        response.setRole(
+                invitation.getRole()
         );
 
         response.setStatus(
@@ -205,6 +216,10 @@ public class WorkspaceInvitationService {
                 InvitationStatus.PENDING
         );
 
+        invitation.setRole(
+                request.getRole()
+        );
+
         invitation.setToken(
                 UUID.randomUUID().toString()
         );
@@ -217,6 +232,15 @@ public class WorkspaceInvitationService {
                 workspaceInvitationRepository.save(
                         invitation
                 );
+
+        // Send invitation email
+        emailService.sendInvitationEmail(
+                invitedUser.getEmail(),
+                workspace.getName(),
+                currentUser.getName(),
+                savedInvitation.getToken(),
+                request.getRole().name()
+        );
 
         return convertToResponse(
                 savedInvitation
@@ -264,12 +288,12 @@ public class WorkspaceInvitationService {
             );
         }
 
-        // Create workspace member
+        // Create workspace member with the role from invitation
         com.apiplatform.api_platform.workspace.entity.WorkspaceMember member =
                 new com.apiplatform.api_platform.workspace.entity.WorkspaceMember();
         member.setWorkspace(invitation.getWorkspace());
         member.setUser(currentUser);
-        member.setRole(com.apiplatform.api_platform.workspace.enums.WorkspaceRole.VIEWER);
+        member.setRole(invitation.getRole());
         workspaceMemberRepository.save(member);
 
         // Update invitation status

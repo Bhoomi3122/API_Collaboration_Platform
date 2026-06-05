@@ -2,6 +2,7 @@ package com.apiplatform.api_platform.workspace.entity;
 
 import com.apiplatform.api_platform.auth.entity.User;
 import com.apiplatform.api_platform.workspace.enums.InvitationStatus;
+import com.apiplatform.api_platform.workspace.enums.WorkspaceRole;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -37,6 +38,10 @@ public class WorkspaceInvitation {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private InvitationStatus status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private WorkspaceRole role;
 
     @Column(nullable = false, unique = true)
     private String token;
