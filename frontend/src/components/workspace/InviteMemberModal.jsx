@@ -1,26 +1,63 @@
 ﻿import { useState } from "react";
 import { X, UserPlus, Mail, ChevronDown } from "lucide-react";
+import { inviteMember } from "../../services/collaborationApi";
 import "../../styles/members.css";
-const InviteMemberModal = ({ isOpen, onClose, workspaceId }) => {
-  const [email, setEmail]     = useState("");
-  const [role, setRole]       = useState("VIEWER");
+
+const InviteMemberModal = ({ isOpen, onClose, workspaceId, onInviteSuccess }) => {
+  const [email, setEmail] = useState("");
+  const [role, setRole] = useState("VIEWER");
   const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState("");
+  const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+
   if (!isOpen) return null;
+
   const handleInvite = async (e) => {
     e.preventDefault();
-    if (!email.trim()) { setError("Email is required"); return; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError("Enter a valid email"); return; }
-    setLoading(true); setError("");
-    setTimeout(() => {
-      setLoading(false); setSuccess(true);
-      setTimeout(() => { setSuccess(false); setEmail(""); setRole("VIEWER"); onClose(); }, 1500);
-    }, 800);
+
+    if (!email.trim()) {
+      setError("Email is required");
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError("Enter a valid email");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      await inviteMember(workspaceId, email.trim());
+      setSuccess(true);
+
+      setTimeout(() => {
+        setSuccess(false);
+        setEmail("");
+        setRole("VIEWER");
+        onClose();
+
+        // Notify parent to refresh members list if callback provided
+        if (onInviteSuccess) {
+          onInviteSuccess();
+        }
+      }, 1500);
+    } catch (err) {
+      console.error("Error inviting member:", err);
+      const errorMessage = err.response?.data?.message || err.message || "Failed to send invitation";
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
+
   const handleClose = () => {
     if (loading) return;
-    setEmail(""); setRole("VIEWER"); setError(""); setSuccess(false);
+    setEmail("");
+    setRole("VIEWER");
+    setError("");
+    setSuccess(false);
     onClose();
   };
   return (

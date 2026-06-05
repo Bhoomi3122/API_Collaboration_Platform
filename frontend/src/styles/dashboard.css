@@ -238,21 +238,20 @@
   font-weight: 500;
 }
 
-.logout-button {
-  padding: 8px 16px;
-  border: 1px solid var(--border);
-  background: var(--card);
-  color: var(--text-secondary);
-  border-radius: 6px;
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.2s;
+/* Sidebar Footer - logout */
+.sidebar-footer {
+  padding: 8px 8px 12px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
 }
 
-.logout-button:hover {
-  border-color: var(--primary);
-  color: var(--primary);
-  background: rgba(47, 129, 247, 0.04);
+.sidebar-logout-item {
+  color: var(--text-secondary) !important;
+}
+
+.sidebar-logout-item:hover {
+  background: #FEF2F2 !important;
+  color: #DC2626 !important;
 }
 
 /* Dashboard Content */

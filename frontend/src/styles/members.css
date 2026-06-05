@@ -2,13 +2,10 @@
    MEMBERS PANEL & INVITE MODAL
    ============================================ */
 
-/* ── Members Panel ─────────────────────────── */
+/* ── Members Panel — no card wrapper (sits on page directly) */
 .members-panel {
-  background: #FFFFFF;
-  border: 1px solid #E5E7EB;
-  border-radius: 10px;
-  padding: 20px;
-  margin-top: 20px;
+  padding: 0;
+  margin-top: 0;
 }
 
 .members-panel-header {
@@ -84,6 +81,8 @@
   font-size: 13px;
   font-weight: 600;
   flex-shrink: 0;
+  background: #F3F4F6;  /* neutral — no random colors */
+  color: #374151;
 }
 
 .member-info {
@@ -377,6 +376,74 @@
 .invite-btn-send:disabled { opacity: 0.6; cursor: not-allowed; }
 
 /* ============================================
+   LOADING & ERROR STATES
+   ============================================ */
+
+.invitations-loading,
+.invitations-error,
+.members-panel-loading,
+.members-panel-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.invitations-loading p,
+.members-panel-loading p {
+  margin-top: 12px;
+  font-size: 14px;
+  color: #6B7280;
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #E5E7EB;
+  border-top-color: #2563EB;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.error-title {
+  margin: 12px 0 6px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.error-message {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: #6B7280;
+}
+
+.btn-retry {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #2563EB;
+  border: none;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #FFFFFF;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-retry:hover {
+  background: #1D4ED8;
+}
+
+/* ============================================
    INVITATIONS PAGE
    ============================================ */
 .invitations-page {
@@ -400,7 +467,59 @@
 .invitations-page-sub {
   font-size: 14px;
   color: #6B7280;
-  margin: 0 0 28px;
+  margin: 0 0 24px;
+}
+
+/* ── Invitation Tabs ─────────────────────── */
+.invitations-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #E5E7EB;
+  padding-bottom: 2px;
+}
+
+.inv-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6B7280;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-bottom: -2px;
+}
+
+.inv-tab:hover {
+  color: #374151;
+  background: #F9FAFB;
+  border-radius: 6px 6px 0 0;
+}
+
+.inv-tab--active {
+  color: #2563EB;
+  border-bottom-color: #2563EB;
+}
+
+.inv-tab-badge {
+  background: #E5E7EB;
+  color: #6B7280;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 18px;
+  text-align: center;
+}
+
+.inv-tab--active .inv-tab-badge {
+  background: #EFF6FF;
+  color: #2563EB;
 }
 
 .invitations-list {
@@ -421,6 +540,11 @@
 }
 .invitation-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
 
+.invitation-card--expired {
+  opacity: 0.6;
+  background: #F9FAFB;
+}
+
 .invitation-ws-icon {
   width: 42px;
   height: 42px;
@@ -431,6 +555,11 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+}
+
+.invitation-card--expired .invitation-ws-icon {
+  background: #F3F4F6;
+  color: #9CA3AF;
 }
 
 .invitation-info {
@@ -459,6 +588,19 @@
   flex-shrink: 0;
 }
 
+.invitation-status-badge {
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.invitation-status-badge--expired {
+  background: #FEF2F2;
+  color: #DC2626;
+}
+
 .invitation-actions {
   display: flex;
   gap: 8px;
@@ -475,8 +617,12 @@
   font-weight: 500;
   cursor: pointer;
   transition: background 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 .btn-accept:hover:not(:disabled) { background: #15803D; }
+.btn-accept:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .btn-reject {
   padding: 6px 14px;
@@ -488,8 +634,12 @@
   font-weight: 500;
   cursor: pointer;
   transition: background 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 .btn-reject:hover:not(:disabled) { background: #FEF2F2; }
+.btn-reject:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .invitations-empty {
   text-align: center;
@@ -499,4 +649,3 @@
 .invitations-empty-icon { font-size: 40px; margin-bottom: 12px; }
 .invitations-empty-title { font-size: 16px; font-weight: 600; color: #374151; margin: 0 0 6px; }
 .invitations-empty-sub { font-size: 13px; margin: 0; }
-

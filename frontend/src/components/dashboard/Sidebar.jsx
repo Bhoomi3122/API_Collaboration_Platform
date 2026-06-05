@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { LogOut } from "lucide-react";
+import { clearAuth } from "../../utils/auth";
 
 function Sidebar({ activeItem = "Dashboard" }) {
   const navigate = useNavigate();
@@ -14,6 +16,11 @@ function Sidebar({ activeItem = "Dashboard" }) {
 
   const handleNavigation = (path) => {
     navigate(path);
+  };
+
+  const handleLogout = () => {
+    clearAuth();
+    navigate("/login", { replace: true });
   };
 
   const renderIcon = (iconName) => {
@@ -90,6 +97,20 @@ function Sidebar({ activeItem = "Dashboard" }) {
           </div>
         ))}
       </nav>
+
+      {/* Logout button at bottom */}
+      <div className="sidebar-footer">
+        <div
+          className="sidebar-item sidebar-logout-item"
+          onClick={handleLogout}
+          title={!isOpen ? "Logout" : ""}
+        >
+          <span className="sidebar-icon">
+            <LogOut size={18} />
+          </span>
+          {isOpen && <span className="sidebar-text">Logout</span>}
+        </div>
+      </div>
     </aside>
   );
 }

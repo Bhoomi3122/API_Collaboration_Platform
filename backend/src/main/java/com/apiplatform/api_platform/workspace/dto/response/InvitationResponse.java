@@ -16,6 +16,7 @@ public class InvitationResponse {
     private Long id;
     private String workspaceName;
     private String invitedByName;
+    private String invitedEmail;
     private InvitationStatus status;
     private LocalDateTime createdAt;
     private LocalDateTime expiresAt;
