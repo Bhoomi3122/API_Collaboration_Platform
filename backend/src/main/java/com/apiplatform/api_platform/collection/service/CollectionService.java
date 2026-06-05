@@ -1,5 +1,7 @@
 package com.apiplatform.api_platform.collection.service;
 
+import com.apiplatform.api_platform.activity.enums.ActivityType;
+import com.apiplatform.api_platform.activity.service.ActivityService;
 import com.apiplatform.api_platform.auth.entity.User;
 import com.apiplatform.api_platform.collection.dto.request.CreateCollectionRequest;
 import com.apiplatform.api_platform.collection.dto.response.CollectionResponse;
@@ -21,15 +23,18 @@ public class CollectionService {
     private final CollectionRepository collectionRepository;
     private final WorkspaceRepository workspaceRepository;
     private final UserRepository userRepository;
+    private final ActivityService activityService;
 
     public CollectionService(
             CollectionRepository collectionRepository,
             WorkspaceRepository workspaceRepository,
-            UserRepository userRepository
+            UserRepository userRepository,
+            ActivityService activityService
     ) {
         this.collectionRepository = collectionRepository;
         this.workspaceRepository = workspaceRepository;
         this.userRepository = userRepository;
+        this.activityService = activityService;
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -120,6 +125,14 @@ public class CollectionService {
         Collection savedCollection =
                 collectionRepository.save(collection);
 
+        activityService.createActivity(
+                ActivityType.COLLECTION_CREATED,
+                "Collection '" + savedCollection.getName() + "' created",
+                workspace,
+                savedCollection,
+                currentUser
+        );
+
         return convertToResponse(savedCollection);
     }
 
@@ -178,6 +191,14 @@ public class CollectionService {
         Collection updatedCollection =
                 collectionRepository.save(collection);
 
+        activityService.createActivity(
+                ActivityType.COLLECTION_UPDATED,
+                "Collection '" + updatedCollection.getName() + "' updated",
+                updatedCollection.getWorkspace(),
+                updatedCollection,
+                getCurrentUser()
+        );
+
         return convertToResponse(updatedCollection);
     }
 
@@ -188,6 +209,14 @@ public class CollectionService {
     public void deleteCollection(Long id) {
 
         Collection collection = getOwnedCollection(id);
+
+        activityService.createActivity(
+                ActivityType.COLLECTION_DELETED,
+                "Collection '" + collection.getName() + "' deleted",
+                collection.getWorkspace(),
+                collection,
+                getCurrentUser()
+        );
 
         collectionRepository.delete(collection);
     }

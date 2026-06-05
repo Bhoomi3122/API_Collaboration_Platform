@@ -1,5 +1,6 @@
 package com.apiplatform.api_platform.apiRequest.service;
 
+import com.apiplatform.api_platform.activity.service.ActivityService;
 import com.apiplatform.api_platform.auth.entity.User;
 import com.apiplatform.api_platform.auth.repository.UserRepository;
 import com.apiplatform.api_platform.collection.entity.Collection;
@@ -22,10 +23,12 @@ public class ApiRequestService {
     private final ApiRequestRepository apiRequestRepository;
     private final CollectionRepository collectionRepository;
     private final UserRepository userRepository;
+    private final ActivityService activityService;
 
     public ApiRequestService(ApiRequestRepository apiRequestRepository,
                              CollectionRepository collectionRepository,
-                             UserRepository userRepository) {
+                             UserRepository userRepository,
+                             ActivityService activityService) {
         this.apiRequestRepository = apiRequestRepository;
         this.collectionRepository = collectionRepository;
         this.userRepository = userRepository;
