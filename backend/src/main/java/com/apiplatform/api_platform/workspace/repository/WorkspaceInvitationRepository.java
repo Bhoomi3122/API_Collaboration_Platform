@@ -14,9 +14,11 @@ import java.util.Optional;
 public interface WorkspaceInvitationRepository extends JpaRepository<WorkspaceInvitation, Long> {
     List<WorkspaceInvitation> findByInvitedUser(User invitedUser);
 
+    List<WorkspaceInvitation> findByInvitedUserAndStatus(User invitedUser, InvitationStatus status);
+
     List<WorkspaceInvitation> findByStatus(InvitationStatus status);
 
-    List<WorkspaceInvitation> findByInvitedUserAndStatus(User invitedUser, InvitationStatus status);
+    List<WorkspaceInvitation> findByWorkspaceAndStatus(Workspace workspace, InvitationStatus status);
 
     Optional<WorkspaceInvitation> findByToken(String token);
 

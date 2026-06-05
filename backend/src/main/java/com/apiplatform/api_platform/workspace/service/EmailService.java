@@ -7,6 +7,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import java.io.UnsupportedEncodingException;
+
 @Service
 public class EmailService {
 
@@ -14,6 +16,9 @@ public class EmailService {
 
     @Value("${app.base-url}")
     private String baseUrl;
+
+    @Value("${spring.mail.username}")
+    private String senderEmail;
 
     public EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
@@ -30,6 +35,7 @@ public class EmailService {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
+            helper.setFrom(senderEmail, "API Platform");
             helper.setTo(toEmail);
             helper.setSubject("You've been invited to join \"" + workspaceName + "\" on API Platform");
 
@@ -42,7 +48,7 @@ public class EmailService {
 
             mailSender.send(message);
 
-        } catch (MessagingException e) {
+        } catch (MessagingException | UnsupportedEncodingException e) {
             throw new RuntimeException("Failed to send invitation email to: " + toEmail, e);
         }
     }
@@ -120,4 +126,3 @@ public class EmailService {
                "</html>";
     }
 }
-

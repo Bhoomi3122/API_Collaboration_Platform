@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import { clearAuth } from "../../utils/auth";
 
 function Topbar() {
   const navigate = useNavigate();
@@ -10,11 +9,6 @@ function Topbar() {
     localStorage.getItem("userName") ||
     (userEmail ? userEmail.split("@")[0] : "User");
   const avatarLetter = displayName.charAt(0).toUpperCase();
-
-  const handleLogout = () => {
-    clearAuth();
-    navigate("/login", { replace: true });
-  };
 
   return (
     <header className="topbar">
@@ -45,9 +39,6 @@ function Topbar() {
           <div className="avatar">{avatarLetter}</div>
           <span className="username">{displayName}</span>
         </div>
-        <button className="logout-button" onClick={handleLogout}>
-          Logout
-        </button>
       </div>
     </header>
   );
