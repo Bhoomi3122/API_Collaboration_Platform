@@ -44,7 +44,7 @@ const WorkspaceNavbar = () => {
           <div className="navbar-logo">
             <Code2 />
           </div>
-          <span className="navbar-title">API Platform</span>
+          <span className="navbar-title">Specify</span>
         </div>
 
         <div className="navbar-right">

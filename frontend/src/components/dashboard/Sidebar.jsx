@@ -1,11 +1,97 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { LogOut } from "lucide-react";
+import { LogOut, X } from "lucide-react";
 import { clearAuth } from "../../utils/auth";
+import "../../styles/members.css";
 
+// ── Logout Confirmation Modal ─────────────────────────────────────────────────
+const LogoutModal = ({ onConfirm, onClose }) => (
+  <div
+    className="modal-overlay"
+    onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+  >
+    <div className="invite-modal" style={{ maxWidth: 440 }}>
+
+      {/* Header */}
+      <div className="invite-modal-header">
+        <div className="invite-modal-title-group">
+          <div
+            className="invite-modal-icon"
+            style={{ background: "#FEF2F2", color: "#DC2626" }}
+          >
+            <LogOut size={18} />
+          </div>
+          <div>
+            <p className="invite-modal-title">Sign Out</p>
+          </div>
+        </div>
+        <button className="invite-modal-close" onClick={onClose}>
+          <X size={16} />
+        </button>
+      </div>
+
+      {/* Body */}
+      <div className="invite-modal-body">
+
+        <p style={{
+          fontSize: 14,
+          color: "#111827",
+          margin: 0,
+          lineHeight: 1.7,
+          fontWeight: 700,
+        }}>
+          Are you sure you want to sign out?
+        </p>
+
+        <p style={{
+          fontSize: 14,
+          color: "#111825",
+          margin: 0,
+          fontWeight:400,
+          lineHeight: 1.7,
+        }}>
+          Your work is automatically saved. You can pick up right where you left off anytime.
+        </p>
+
+        {/* Footer */}
+        <div className="invite-modal-footer" style={{ paddingTop: 8 }}>
+          <button className="invite-btn-cancel" onClick={onClose}>
+            Stay Here
+          </button>
+          <button
+            onClick={onConfirm}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 7,
+              padding: "8px 18px",
+              background: "#DC2626",
+              border: "none",
+              borderRadius: 7,
+              fontSize: 13,
+              fontWeight: 500,
+              color: "#FFFFFF",
+              cursor: "pointer",
+              transition: "background 0.15s",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "#B91C1C")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = "#DC2626")}
+          >
+            <LogOut size={13} />
+            Sign Out
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+);
+
+// ── Sidebar ───────────────────────────────────────────────────────────────────
 function Sidebar({ activeItem = "Dashboard" }) {
   const navigate = useNavigate();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const menuItems = [
     { name: "Dashboard", icon: "dashboard", path: "/dashboard" },
@@ -19,6 +105,10 @@ function Sidebar({ activeItem = "Dashboard" }) {
   };
 
   const handleLogout = () => {
+    setShowLogoutModal(true);
+  };
+
+  const confirmLogout = () => {
     clearAuth();
     navigate("/login", { replace: true });
   };
@@ -69,49 +159,59 @@ function Sidebar({ activeItem = "Dashboard" }) {
   );
 
   return (
-    <aside className={`sidebar ${isOpen ? "sidebar--open" : "sidebar--collapsed"}`}>
-      {/* Header with toggle button */}
-      <div className="sidebar-header">
-        <button
-          className="sidebar-toggle-btn"
-          onClick={() => setIsOpen(!isOpen)}
-          title={isOpen ? "Collapse sidebar" : "Expand sidebar"}
-        >
-          <HomeIcon />
-        </button>
-        {isOpen && <h2 className="sidebar-logo">API Platform</h2>}
-      </div>
-
-      {/* Nav items */}
-      <nav className="sidebar-nav">
-        {menuItems.map((item, index) => (
-          <div
-            key={index}
-            className={`sidebar-item ${item.name === activeItem ? "active" : ""}`}
-            onClick={() => handleNavigation(item.path)}
-            title={!isOpen ? item.name : ""}
+    <>
+      <aside className={`sidebar ${isOpen ? "sidebar--open" : "sidebar--collapsed"}`}>
+        {/* Header with toggle button */}
+        <div className="sidebar-header">
+          <button
+            className="sidebar-toggle-btn"
+            onClick={() => setIsOpen(!isOpen)}
+            title={isOpen ? "Collapse sidebar" : "Expand sidebar"}
           >
-            {item.name === activeItem && <span className="active-indicator"></span>}
-            <span className="sidebar-icon">{renderIcon(item.icon)}</span>
-            {isOpen && <span className="sidebar-text">{item.name}</span>}
-          </div>
-        ))}
-      </nav>
-
-      {/* Logout button at bottom */}
-      <div className="sidebar-footer">
-        <div
-          className="sidebar-item sidebar-logout-item"
-          onClick={handleLogout}
-          title={!isOpen ? "Logout" : ""}
-        >
-          <span className="sidebar-icon">
-            <LogOut size={18} />
-          </span>
-          {isOpen && <span className="sidebar-text">Logout</span>}
+            <HomeIcon />
+          </button>
+          {isOpen && <h2 className="sidebar-logo">Specify</h2>}
         </div>
-      </div>
-    </aside>
+
+        {/* Nav items */}
+        <nav className="sidebar-nav">
+          {menuItems.map((item, index) => (
+            <div
+              key={index}
+              className={`sidebar-item ${item.name === activeItem ? "active" : ""}`}
+              onClick={() => handleNavigation(item.path)}
+              title={!isOpen ? item.name : ""}
+            >
+              {item.name === activeItem && <span className="active-indicator"></span>}
+              <span className="sidebar-icon">{renderIcon(item.icon)}</span>
+              {isOpen && <span className="sidebar-text">{item.name}</span>}
+            </div>
+          ))}
+        </nav>
+
+        {/* Logout button at bottom */}
+        <div className="sidebar-footer">
+          <div
+            className="sidebar-item sidebar-logout-item"
+            onClick={handleLogout}
+            title={!isOpen ? "Logout" : ""}
+          >
+            <span className="sidebar-icon">
+              <LogOut size={18} />
+            </span>
+            {isOpen && <span className="sidebar-text">Logout</span>}
+          </div>
+        </div>
+      </aside>
+
+      {/* Logout Confirmation Modal */}
+      {showLogoutModal && (
+        <LogoutModal
+          onConfirm={confirmLogout}
+          onClose={() => setShowLogoutModal(false)}
+        />
+      )}
+    </>
   );
 }
 

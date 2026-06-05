@@ -380,9 +380,9 @@ const CollectionDetails = () => {
           <div className="cd-navbar-logo">
             <Layers size={14} />
           </div>
-          <span className="cd-navbar-title">DevHub</span>
+          <span className="cd-navbar-title">Specify</span>
           <span className="cd-navbar-divider">|</span>
-          <span className="cd-navbar-subtitle">API Platform</span>
+          <span className="cd-navbar-subtitle">API Collections</span>
         </div>
         <div className="cd-navbar-right">
           <button className="cd-navbar-icon-btn">
