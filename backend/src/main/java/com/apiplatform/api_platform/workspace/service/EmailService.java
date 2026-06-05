@@ -35,9 +35,9 @@ public class EmailService {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-            helper.setFrom(senderEmail, "API Platform");
+            helper.setFrom(senderEmail, "Specify");
             helper.setTo(toEmail);
-            helper.setSubject("You've been invited to join \"" + workspaceName + "\" on API Platform");
+            helper.setSubject("You've been invited to join \"" + workspaceName + "\" on Specify");
 
             String acceptUrl = baseUrl + "/invitations/accept?token=" + token;
             String rejectUrl = baseUrl + "/invitations/reject?token=" + token;
@@ -68,7 +68,7 @@ public class EmailService {
 
                "    <!-- Logo / Header -->" +
                "    <div style='text-align: center; margin-bottom: 28px;'>" +
-               "      <span style='font-size: 20px; font-weight: 700; color: #24292F;'>API Platform</span>" +
+               "      <span style='font-size: 20px; font-weight: 700; color: #24292F;'>Specify</span>" +
                "    </div>" +
 
                "    <!-- Title -->" +
