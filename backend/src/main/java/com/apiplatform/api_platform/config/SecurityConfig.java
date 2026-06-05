@@ -42,8 +42,20 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()  // allow CORS preflight
+                        // Allow CORS preflight requests without authentication
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                        // Public auth endpoints (login, signup)
                         .requestMatchers("/api/auth/**").permitAll()
+
+                        // Invitation endpoints — require JWT (only the correct logged-in user can act)
+                        .requestMatchers(HttpMethod.POST, "/api/workspaces/*/invite").authenticated()
+                        .requestMatchers(HttpMethod.GET,  "/api/invitations/pending").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/invitations/*/accept").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/invitations/*/reject").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/invitations/token/*/reject").authenticated()
+
+                        // All other API endpoints also require JWT
                         .anyRequest().authenticated()
                 );
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
