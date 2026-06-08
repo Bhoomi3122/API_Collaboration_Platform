@@ -20,6 +20,8 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "activities")
 public class Activity {
+
+
     private Long id;
 
     @Enumerated(EnumType.STRING)
