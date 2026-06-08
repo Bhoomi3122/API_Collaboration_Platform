@@ -132,19 +132,14 @@ const CollectionDetails = () => {
         return;
       }
 
-      // Always execute directly from the browser (works for both saved and unsaved requests)
+      // Route through the backend proxy — avoids browser CORS/origin restrictions
+      // and ensures auth, activity tracking, and team consistency work correctly.
+      // Backend returns ApiExecutionResponse: { statusCode, responseBody, responseTime, responseHeaders }
       const result = await executeDirectRequest(payload);
-
-      // Normalize to the format ResponseViewer expects
-      setExecutionResponse({
-        statusCode:      result.status,
-        responseBody:    typeof result.data === "string" ? result.data : JSON.stringify(result.data, null, 2),
-        responseTime:    result.duration,
-        responseHeaders: result.headers,
-      });
+      setExecutionResponse(result);
     } catch (error) {
       console.error("Execution failed:", error);
-      // HTTP errors with a response body (safety fallback — shouldn't reach here with validateStatus:()=>true)
+      // Axios throws for network-level failures (no response from our backend)
       if (error.response) {
         const errData = error.response.data;
         setExecutionResponse({
@@ -154,10 +149,9 @@ const CollectionDetails = () => {
           responseHeaders: error.response.headers || {},
         });
       } else {
-        // True network failure — no HTTP response at all (CORS block, DNS failure, timeout, etc.)
         setExecutionError(
           error.code === "ERR_NETWORK"
-            ? "Network error — the request could not be sent. Check the URL, CORS policy, or your connection."
+            ? "Network error — could not reach the Specify backend. Is it running?"
             : error.message || "Request failed. Please check your connection and try again."
         );
       }
@@ -166,7 +160,7 @@ const CollectionDetails = () => {
     }
   };
 
-  // ── Save and Send (save first, then execute) ──────────────────
+  // ── Save and Send (save first, then execute via backend proxy) ───────────
   const handleSaveAndSend = async (editorState) => {
     // First save the request
     setSaving(true);
@@ -175,39 +169,45 @@ const CollectionDetails = () => {
     setExecutionResponse(null);
 
     try {
-      const payload = {
-        name:         editorState.name || selectedRequest?.name || "Untitled Request",
-        method:       editorState.method,
-        url:          editorState.url,
-        headers:      editorState.headers,
-        body:         editorState.body,
-        collectionId: Number(collectionId),
+      const savePayload = {
+        name:            editorState.name || selectedRequest?.name || "Untitled Request",
+        method:          editorState.method,
+        url:             editorState.url,
+        headers:         editorState.headers,
+        body:            editorState.body,
+        collectionId:    Number(collectionId),
+        // Auth fields — persisted so the Auth tab is pre-filled when reopened
+        authType:        editorState.authType,
+        authToken:       editorState.authToken,
+        authUsername:    editorState.authUsername,
+        authPassword:    editorState.authPassword,
+        authApiKeyName:  editorState.authApiKeyName,
+        authApiKeyValue: editorState.authApiKeyValue,
       };
 
       let saved;
       if (selectedRequest?.id) {
-        saved = await updateRequest(selectedRequest.id, payload);
+        saved = await updateRequest(selectedRequest.id, savePayload);
       } else {
-        saved = await createRequest(payload);
+        saved = await createRequest(savePayload);
       }
 
       setSaveMessage({ type: "success", text: "Request saved successfully." });
 
-      // Reload the request list to get the updated request
+      // Reload the request list to reflect the saved request in the sidebar
       await fetchRequests(saved.id);
 
-      // Now execute the saved request
+      // Execute using current editor state (incl. auth) through backend proxy
       setExecuting(true);
       setSaving(false);
 
       try {
-        const result = await executeRequest(saved.id);
+        // editorState includes auth fields from RequestEditor's buildExecutePayload()
+        const result = await executeDirectRequest(editorState);
         setExecutionResponse(result);
-        // Keep the success message visible
         setTimeout(() => setSaveMessage(null), 3000);
       } catch (execError) {
         console.error("Execution failed:", execError);
-        // If the backend itself returned an HTTP error body, show it as a response
         if (execError.response) {
           const errData = execError.response.data;
           setExecutionResponse({
@@ -242,12 +242,19 @@ const CollectionDetails = () => {
     setSaveMessage(null);
     try {
       const payload = {
-        name:         editorState.name || selectedRequest?.name || "Untitled Request",
-        method:       editorState.method,
-        url:          editorState.url,
-        headers:      editorState.headers,
-        body:         editorState.body,
-        collectionId: Number(collectionId),
+        name:            editorState.name || selectedRequest?.name || "Untitled Request",
+        method:          editorState.method,
+        url:             editorState.url,
+        headers:         editorState.headers,
+        body:            editorState.body,
+        collectionId:    Number(collectionId),
+        // Auth fields — persisted so the Auth tab is pre-filled when reopened
+        authType:        editorState.authType,
+        authToken:       editorState.authToken,
+        authUsername:    editorState.authUsername,
+        authPassword:    editorState.authPassword,
+        authApiKeyName:  editorState.authApiKeyName,
+        authApiKeyValue: editorState.authApiKeyValue,
       };
 
       let saved;

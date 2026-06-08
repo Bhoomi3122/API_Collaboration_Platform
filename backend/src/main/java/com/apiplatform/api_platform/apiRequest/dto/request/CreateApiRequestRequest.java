@@ -32,5 +32,13 @@ public class CreateApiRequestRequest {
 
     @NotNull(message = "Collection ID is required")
     private Long collectionId;
+
+    // ── Authorization fields (optional) ─────────────────────────────────────
+    private String authType;
+    private String authToken;
+    private String authUsername;
+    private String authPassword;
+    private String authApiKeyName;
+    private String authApiKeyValue;
 }
 

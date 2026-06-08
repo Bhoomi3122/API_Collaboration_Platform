@@ -1,5 +1,6 @@
 package com.apiplatform.api_platform.apiRequest.controller;
 
+import com.apiplatform.api_platform.apiRequest.dto.request.AdHocExecuteRequest;
 import com.apiplatform.api_platform.apiRequest.dto.request.CreateApiRequestRequest;
 import com.apiplatform.api_platform.apiRequest.dto.response.ApiExecutionResponse;
 import com.apiplatform.api_platform.apiRequest.dto.response.ApiRequestResponse;
@@ -65,6 +66,14 @@ public class ApiRequestController {
         return ResponseEntity.noContent().build();
     }
 
+    // ── POST /api/requests/execute  (ad-hoc, no save required) ─────────────────
+    @PostMapping("/execute")
+    public ResponseEntity<ApiExecutionResponse> executeAdHocRequest(
+            @RequestBody AdHocExecuteRequest request) {
+        return ResponseEntity.ok(apiExecutionService.executeAdHocRequest(request));
+    }
+
+    // ── POST /api/requests/{id}/execute  (saved request by ID) ─────────────────
     @PostMapping("/{id}/execute")
     public ResponseEntity<ApiExecutionResponse> executeRequest(
             @PathVariable Long id
