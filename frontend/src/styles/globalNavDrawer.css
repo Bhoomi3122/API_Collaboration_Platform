@@ -151,3 +151,18 @@
   flex-shrink: 0;
 }
 
+/* Footer (logout) */
+.gnd-footer {
+  padding: 10px 10px 16px;
+  border-top: 1px solid #E5E7EB;
+}
+.gnd-logout-item {
+  color: #DC2626 !important;
+}
+.gnd-logout-item:hover {
+  background: #FEF2F2 !important;
+  color: #B91C1C !important;
+}
+.gnd-logout-item .gnd-nav-icon svg {
+  stroke: currentColor;
+}

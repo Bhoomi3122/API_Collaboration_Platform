@@ -4,7 +4,7 @@ import {
   Search, Plus, FolderOpen, Calendar, AlertCircle,
   MoreVertical, Trash2, Pencil,
 } from "lucide-react";
-import Sidebar from "../dashboard/Sidebar";
+import GlobalNavDrawer from "../common/GlobalNavDrawer";
 import Topbar from "../dashboard/Topbar";
 import CreateWorkspaceModal from "../dashboard/CreateWorkspaceModal";
 import { getWorkspaces, deleteWorkspace, updateWorkspace } from "../../services/workspaceApi";
@@ -165,6 +165,7 @@ function AllWorkspacesPage() {
   const [deleting, setDeleting]                     = useState(false);
   const [renameTarget, setRenameTarget]             = useState(null);
   const [renaming, setRenaming]                     = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(() => {
     const params = new URLSearchParams(location.search);
     return params.get("tab") === "shared" ? "shared" : "mine";
@@ -341,9 +342,13 @@ function AllWorkspacesPage() {
 
   return (
     <div className="dashboard-container">
-      <Sidebar activeItem="Workspaces" />
+      <GlobalNavDrawer
+        isOpen={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        activeItem="Workspaces"
+      />
       <main className="dashboard-main">
-        <Topbar />
+        <Topbar onMenuOpen={() => setDrawerOpen(true)} />
         <div className="dashboard-content">
 
           <CreateWorkspaceModal
