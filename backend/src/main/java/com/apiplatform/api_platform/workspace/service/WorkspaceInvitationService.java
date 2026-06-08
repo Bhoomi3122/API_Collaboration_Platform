@@ -1,6 +1,7 @@
 package com.apiplatform.api_platform.workspace.service;
 
-
+import com.apiplatform.api_platform.activity.enums.ActivityType;
+import com.apiplatform.api_platform.activity.service.ActivityService;
 import com.apiplatform.api_platform.auth.entity.User;
 import com.apiplatform.api_platform.auth.exception.UserNotFoundException;
 import com.apiplatform.api_platform.auth.repository.UserRepository;
@@ -16,6 +17,7 @@ import com.apiplatform.api_platform.workspace.repository.WorkspaceRepository;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -28,13 +30,15 @@ public class WorkspaceInvitationService {
     private UserRepository userRepository;
     private WorkspacePermissionService workspacePermissionService;
     private EmailService emailService;
+    private final ActivityService activityService;
 
     public WorkspaceInvitationService(WorkspaceRepository workspaceRepository,
                                       WorkspaceInvitationRepository workspaceInvitationRepository,
                                       WorkspaceMemberRepository workspaceMemberRepository,
                                       UserRepository userRepository,
                                       WorkspacePermissionService workspacePermissionService,
-                                      EmailService emailService)
+                                      EmailService emailService,
+                                      ActivityService activityService)
     {
         this.workspaceRepository = workspaceRepository;
         this.workspaceInvitationRepository = workspaceInvitationRepository;
@@ -42,6 +46,7 @@ public class WorkspaceInvitationService {
         this.userRepository = userRepository;
         this.workspacePermissionService = workspacePermissionService;
         this.emailService = emailService;
+        this.activityService = activityService;
     }
 
     private InvitationResponse convertToResponse(
@@ -180,6 +185,7 @@ public class WorkspaceInvitationService {
         }
     }
 
+    @Transactional
     public InvitationResponse inviteMember(
             Long workspaceId,
             InviteMemberRequest request
@@ -233,6 +239,14 @@ public class WorkspaceInvitationService {
                         invitation
                 );
 
+        activityService.createActivity(
+                ActivityType.MEMBER_INVITED,
+                "Invited " + invitedUser.getName() + " to the workspace",
+                workspace,
+                null,
+                currentUser
+        );
+
         // Send invitation email
         emailService.sendInvitationEmail(
                 invitedUser.getEmail(),
@@ -241,6 +255,7 @@ public class WorkspaceInvitationService {
                 savedInvitation.getToken(),
                 request.getRole().name()
         );
+
 
         return convertToResponse(
                 savedInvitation
@@ -258,6 +273,7 @@ public class WorkspaceInvitationService {
                 .collect(java.util.stream.Collectors.toList());
     }
 
+    @Transactional
     public void acceptInvitation(Long invitationId)
     {
         User currentUser = getCurrentUser();
@@ -298,7 +314,15 @@ public class WorkspaceInvitationService {
 
         // Update invitation status
         invitation.setStatus(InvitationStatus.ACCEPTED);
+
         workspaceInvitationRepository.save(invitation);
+        activityService.createActivity(
+                ActivityType.MEMBER_JOINED,
+                currentUser.getName() + " joined the workspace",
+                invitation.getWorkspace(),
+                null,
+                currentUser
+        );
     }
 
     public void rejectInvitation(Long invitationId)
@@ -346,7 +370,9 @@ public class WorkspaceInvitationService {
         workspaceInvitationRepository.delete(invitation);
     }
 
+
     // ── Remove a member from a workspace (owner only) ─────────────────────────
+    @Transactional
     public void removeMember(Long workspaceId, Long userId)
     {
         User currentUser = getCurrentUser();
@@ -369,6 +395,13 @@ public class WorkspaceInvitationService {
                         .orElseThrow(() -> new IllegalArgumentException("User is not a member of this workspace"));
 
         workspaceMemberRepository.delete(member);
+        activityService.createActivity(
+                ActivityType.MEMBER_LEFT,
+                targetUser.getName() + " was removed from the workspace",
+                workspace,
+                null,
+                currentUser
+        );
     }
 
     // ── Change member role (owner only, EDITOR ↔ VIEWER) ─────────────────────

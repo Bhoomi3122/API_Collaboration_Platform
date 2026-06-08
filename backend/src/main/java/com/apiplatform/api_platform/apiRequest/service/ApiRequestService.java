@@ -1,5 +1,7 @@
 package com.apiplatform.api_platform.apiRequest.service;
 
+import com.apiplatform.api_platform.activity.enums.ActivityType;
+import com.apiplatform.api_platform.activity.service.ActivityService;
 import com.apiplatform.api_platform.auth.entity.User;
 import com.apiplatform.api_platform.auth.repository.UserRepository;
 import com.apiplatform.api_platform.collection.entity.Collection;
@@ -12,6 +14,7 @@ import com.apiplatform.api_platform.apiRequest.exception.ApiRequestNotFoundExcep
 import com.apiplatform.api_platform.apiRequest.repository.ApiRequestRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,13 +25,16 @@ public class ApiRequestService {
     private final ApiRequestRepository apiRequestRepository;
     private final CollectionRepository collectionRepository;
     private final UserRepository userRepository;
+    private final ActivityService activityService;
 
     public ApiRequestService(ApiRequestRepository apiRequestRepository,
                              CollectionRepository collectionRepository,
-                             UserRepository userRepository) {
+                             UserRepository userRepository,
+                             ActivityService activityService) {
         this.apiRequestRepository = apiRequestRepository;
         this.collectionRepository = collectionRepository;
         this.userRepository = userRepository;
+        this.activityService = activityService;
     }
 
     // ── Helper: Get currently authenticated user ──────────────────────────────────────────
@@ -85,6 +91,7 @@ public class ApiRequestService {
 
     // ── Create a new API request ────────────────────────────────────────────────
 
+    @Transactional
     public ApiRequestResponse createRequest(CreateApiRequestRequest request) {
         // Verify ownership before creating
         Collection collection = getOwnedCollection(request.getCollectionId());
@@ -99,6 +106,13 @@ public class ApiRequestService {
         apiRequest.setCollection(collection);
 
         ApiRequest savedRequest = apiRequestRepository.save(apiRequest);
+        activityService.createActivity(
+                ActivityType.ENDPOINT_CREATED,
+                savedRequest.getMethod() + " " + savedRequest.getUrl() + " created",
+                collection.getWorkspace(),
+                collection,
+                getCurrentUser()
+        );
         return convertToResponse(savedRequest);
     }
 
@@ -137,6 +151,7 @@ public class ApiRequestService {
 
     // ── Update an existing request ──────────────────────────────────────────────
 
+    @Transactional
     public ApiRequestResponse updateRequest(Long id, CreateApiRequestRequest request) {
         ApiRequest existing = apiRequestRepository.findById(id)
                 .orElseThrow(() -> new ApiRequestNotFoundException(
@@ -166,11 +181,19 @@ public class ApiRequestService {
         existing.setBody(request.getBody());
 
         ApiRequest updatedRequest = apiRequestRepository.save(existing);
+        activityService.createActivity(
+                ActivityType.ENDPOINT_UPDATED,
+                updatedRequest.getMethod() + " " + updatedRequest.getUrl() + " updated",
+                updatedRequest.getCollection().getWorkspace(),
+                updatedRequest.getCollection(),
+                getCurrentUser()
+        );
         return convertToResponse(updatedRequest);
     }
 
     // ── Delete a request ────────────────────────────────────────────────────────
 
+    @Transactional
     public void deleteRequest(Long id) {
         ApiRequest apiRequest = apiRequestRepository.findById(id)
                 .orElseThrow(() -> new ApiRequestNotFoundException(
@@ -185,7 +208,15 @@ public class ApiRequestService {
             throw new ApiRequestNotFoundException(
                     "API request not found with id: " + id);
         }
-
         apiRequestRepository.delete(apiRequest);
+
+
+        activityService.createActivity(
+                ActivityType.ENDPOINT_DELETED,
+                apiRequest.getMethod() + " " + apiRequest.getUrl() + " deleted",
+                apiRequest.getCollection().getWorkspace(),
+                apiRequest.getCollection(),
+                getCurrentUser()
+        );
     }
 }

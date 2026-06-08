@@ -20,13 +20,15 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "activities")
 public class Activity {
-
-
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private ActivityType type;
 
+    @Column(nullable = false)
     private String message;
 
     @ManyToOne
@@ -38,9 +40,10 @@ public class Activity {
     private Collection collection;
 
     @ManyToOne
-    @JoinColumn(name = "actor_id")
+    @JoinColumn(name = "actor_id", nullable = false)
     private User actor;
 
     @CreationTimestamp
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 }

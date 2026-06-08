@@ -1,5 +1,7 @@
 package com.apiplatform.api_platform.collection.service;
 
+import com.apiplatform.api_platform.activity.enums.ActivityType;
+import com.apiplatform.api_platform.activity.service.ActivityService;
 import com.apiplatform.api_platform.auth.entity.User;
 import com.apiplatform.api_platform.collection.dto.request.CreateCollectionRequest;
 import com.apiplatform.api_platform.collection.dto.response.CollectionResponse;
@@ -11,6 +13,7 @@ import com.apiplatform.api_platform.workspace.entity.Workspace;
 import com.apiplatform.api_platform.workspace.repository.WorkspaceRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,15 +24,18 @@ public class CollectionService {
     private final CollectionRepository collectionRepository;
     private final WorkspaceRepository workspaceRepository;
     private final UserRepository userRepository;
+    private final ActivityService activityService;
 
     public CollectionService(
             CollectionRepository collectionRepository,
             WorkspaceRepository workspaceRepository,
-            UserRepository userRepository
+            UserRepository userRepository,
+            ActivityService activityService
     ) {
         this.collectionRepository = collectionRepository;
         this.workspaceRepository = workspaceRepository;
         this.userRepository = userRepository;
+        this.activityService = activityService;
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -94,6 +100,7 @@ public class CollectionService {
     // Create Collection
     // ─────────────────────────────────────────────────────────────
 
+    @Transactional
     public CollectionResponse createCollection(
             CreateCollectionRequest request
     ) {
@@ -119,6 +126,14 @@ public class CollectionService {
 
         Collection savedCollection =
                 collectionRepository.save(collection);
+
+        activityService.createActivity(
+                ActivityType.COLLECTION_CREATED,
+                "Collection '" + savedCollection.getName() + "' created",
+                workspace,
+                savedCollection,
+                currentUser
+        );
 
         return convertToResponse(savedCollection);
     }
@@ -165,6 +180,7 @@ public class CollectionService {
     // Update Collection
     // ─────────────────────────────────────────────────────────────
 
+    @Transactional
     public CollectionResponse updateCollection(
             Long id,
             CreateCollectionRequest request
@@ -178,6 +194,14 @@ public class CollectionService {
         Collection updatedCollection =
                 collectionRepository.save(collection);
 
+        activityService.createActivity(
+                ActivityType.COLLECTION_UPDATED,
+                "Collection '" + updatedCollection.getName() + "' updated",
+                updatedCollection.getWorkspace(),
+                updatedCollection,
+                getCurrentUser()
+        );
+
         return convertToResponse(updatedCollection);
     }
 
@@ -185,10 +209,19 @@ public class CollectionService {
     // Delete Collection
     // ─────────────────────────────────────────────────────────────
 
+    @Transactional
     public void deleteCollection(Long id) {
 
         Collection collection = getOwnedCollection(id);
 
         collectionRepository.delete(collection);
+
+        activityService.createActivity(
+                ActivityType.COLLECTION_DELETED,
+                "Collection '" + collection.getName() + "' deleted",
+                collection.getWorkspace(),
+                collection,
+                getCurrentUser()
+        );
     }
 }
