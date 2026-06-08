@@ -7,8 +7,6 @@ import com.apiplatform.api_platform.activity.repository.ActivityRepository;
 import com.apiplatform.api_platform.auth.entity.User;
 import com.apiplatform.api_platform.collection.entity.Collection;
 import com.apiplatform.api_platform.workspace.entity.Workspace;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;

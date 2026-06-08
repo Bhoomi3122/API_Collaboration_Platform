@@ -13,6 +13,7 @@ import com.apiplatform.api_platform.workspace.entity.Workspace;
 import com.apiplatform.api_platform.workspace.repository.WorkspaceRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -99,6 +100,7 @@ public class CollectionService {
     // Create Collection
     // ─────────────────────────────────────────────────────────────
 
+    @Transactional
     public CollectionResponse createCollection(
             CreateCollectionRequest request
     ) {
@@ -178,6 +180,7 @@ public class CollectionService {
     // Update Collection
     // ─────────────────────────────────────────────────────────────
 
+    @Transactional
     public CollectionResponse updateCollection(
             Long id,
             CreateCollectionRequest request
@@ -206,9 +209,12 @@ public class CollectionService {
     // Delete Collection
     // ─────────────────────────────────────────────────────────────
 
+    @Transactional
     public void deleteCollection(Long id) {
 
         Collection collection = getOwnedCollection(id);
+
+        collectionRepository.delete(collection);
 
         activityService.createActivity(
                 ActivityType.COLLECTION_DELETED,
@@ -217,7 +223,5 @@ public class CollectionService {
                 collection,
                 getCurrentUser()
         );
-
-        collectionRepository.delete(collection);
     }
 }
