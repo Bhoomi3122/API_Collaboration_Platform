@@ -1,29 +1,26 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Folder, Check, X, Mail, RefreshCw, AlertCircle, Clock, CheckCircle, Inbox } from "lucide-react";
+import { Folder, Check, X, Mail, RefreshCw, AlertCircle, Clock, Inbox } from "lucide-react";
 import { getMyInvitations, acceptInvitation, rejectInvitation } from "../../services/collaborationApi";
-import Sidebar from "../dashboard/Sidebar";
-import Topbar from "../dashboard/Topbar";
+import GlobalNavDrawer from "../common/GlobalNavDrawer";
+import Topbar from "./Topbar";
 import "../../styles/members.css";
-
 const ROLE_STYLES = {
   OWNER: { bg: "#DCFCE7", color: "#16A34A" },
   EDITOR: { bg: "#DBEAFE", color: "#2563EB" },
   VIEWER: { bg: "#EDE9FE", color: "#7C3AED" },
 };
-
 const InvitationsPage = () => {
   const navigate = useNavigate();
   const [invitations, setInvitations] = useState([]);
   const [processing, setProcessing] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState("pending"); // pending, all, expired
-
+  const [activeTab, setActiveTab] = useState("pending");
+  const [drawerOpen, setDrawerOpen] = useState(false);
   useEffect(() => {
     loadInvitations();
   }, []);
-
   const loadInvitations = async () => {
     try {
       setLoading(true);
@@ -37,30 +34,19 @@ const InvitationsPage = () => {
       setLoading(false);
     }
   };
-
   const getFilteredInvitations = () => {
-    if (activeTab === "all") {
-      return invitations;
-    } else if (activeTab === "pending") {
-      return invitations.filter(inv => inv.status === "PENDING");
-    } else if (activeTab === "expired") {
-      return invitations.filter(inv => inv.status === "EXPIRED");
-    }
+    if (activeTab === "all") return invitations;
+    if (activeTab === "pending") return invitations.filter(inv => inv.status === "PENDING");
+    if (activeTab === "expired") return invitations.filter(inv => inv.status === "EXPIRED");
     return invitations;
   };
-
   const filteredInvitations = getFilteredInvitations();
-
-  const getTabCounts = () => {
-    return {
-      all: invitations.length,
-      pending: invitations.filter(inv => inv.status === "PENDING").length,
-      expired: invitations.filter(inv => inv.status === "EXPIRED").length,
-    };
-  };
-
+  const getTabCounts = () => ({
+    all: invitations.length,
+    pending: invitations.filter(inv => inv.status === "PENDING").length,
+    expired: invitations.filter(inv => inv.status === "EXPIRED").length,
+  });
   const tabCounts = getTabCounts();
-
   const handleAccept = async (id) => {
     setProcessing(id);
     try {
@@ -73,7 +59,6 @@ const InvitationsPage = () => {
       setProcessing(null);
     }
   };
-
   const handleReject = async (id) => {
     setProcessing(id);
     try {
@@ -86,7 +71,6 @@ const InvitationsPage = () => {
       setProcessing(null);
     }
   };
-
   const formatDate = (dateString) => {
     if (!dateString) return "Recently";
     const date = new Date(dateString);
@@ -95,27 +79,27 @@ const InvitationsPage = () => {
     const diffMins = Math.floor(diffMs / 60000);
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
-
     if (diffMins < 60) return diffMins <= 1 ? "Just now" : `${diffMins} minutes ago`;
     if (diffHours < 24) return diffHours === 1 ? "1 hour ago" : `${diffHours} hours ago`;
     if (diffDays === 1) return "1 day ago";
     if (diffDays < 7) return `${diffDays} days ago`;
     return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
   };
-
   return (
     <div className="dashboard-container">
-      <Sidebar activeItem="Invitations" />
+      <GlobalNavDrawer
+        isOpen={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        activeItem="Invitations"
+      />
       <main className="dashboard-main">
-        <Topbar />
+        <Topbar onMenuOpen={() => setDrawerOpen(true)} />
         <div className="dashboard-content">
           <div className="invitations-content">
             <h1 className="invitations-page-title">Invitations</h1>
             <p className="invitations-page-sub">
               Workspace invitations sent to you by other members.
             </p>
-
-            {/* Tabs */}
             <div className="invitations-tabs">
               <button
                 className={`inv-tab ${activeTab === "pending" ? "inv-tab--active" : ""}`}
@@ -138,7 +122,6 @@ const InvitationsPage = () => {
                 )}
               </button>
             </div>
-
             {loading ? (
               <div className="invitations-loading">
                 <div className="spinner"></div>
@@ -183,57 +166,29 @@ const InvitationsPage = () => {
                   const busy = processing === inv.id;
                   const isExpired = inv.status === "EXPIRED";
                   const isPending = inv.status === "PENDING";
-
                   return (
                     <div key={inv.id} className={`invitation-card ${isExpired ? "invitation-card--expired" : ""}`}>
-                      <div className="invitation-ws-icon">
-                        <Folder size={20} />
-                      </div>
-
+                      <div className="invitation-ws-icon"><Folder size={20} /></div>
                       <div className="invitation-info">
                         <p className="invitation-ws-name">{inv.workspaceName}</p>
                         <p className="invitation-meta">
-                          Invited by <strong>{inv.invitedByName}</strong> &nbsp;·&nbsp;{" "}
+                          Invited by <strong>{inv.invitedByName}</strong> &nbsp;&nbsp;{" "}
                           {formatDate(inv.createdAt)}
                         </p>
                       </div>
-
-                      <span
-                        className="invitation-role-badge"
-                        style={{ background: roleStyle.bg, color: roleStyle.color }}
-                      >
+                      <span className="invitation-role-badge" style={{ background: roleStyle.bg, color: roleStyle.color }}>
                         Viewer
                       </span>
-
                       {isExpired && (
-                        <span className="invitation-status-badge invitation-status-badge--expired">
-                          Expired
-                        </span>
+                        <span className="invitation-status-badge invitation-status-badge--expired">Expired</span>
                       )}
-
                       {isPending && (
                         <div className="invitation-actions">
-                          <button
-                            className="btn-accept"
-                            onClick={() => handleAccept(inv.id)}
-                            disabled={busy}
-                          >
-                            {busy ? "…" : (
-                              <>
-                                <Check size={12} /> Accept
-                              </>
-                            )}
+                          <button className="btn-accept" onClick={() => handleAccept(inv.id)} disabled={busy}>
+                            {busy ? "…" : (<><Check size={12} /> Accept</>)}
                           </button>
-                          <button
-                            className="btn-reject"
-                            onClick={() => handleReject(inv.id)}
-                            disabled={busy}
-                          >
-                            {busy ? "…" : (
-                              <>
-                                <X size={12} /> Reject
-                              </>
-                            )}
+                          <button className="btn-reject" onClick={() => handleReject(inv.id)} disabled={busy}>
+                            {busy ? "…" : (<><X size={12} /> Reject</>)}
                           </button>
                         </div>
                       )}
@@ -248,5 +203,4 @@ const InvitationsPage = () => {
     </div>
   );
 };
-
 export default InvitationsPage;

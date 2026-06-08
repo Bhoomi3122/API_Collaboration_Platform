@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Sidebar from "./Sidebar";
+import GlobalNavDrawer from "../common/GlobalNavDrawer";
 import Topbar from "./Topbar";
 import QuickActions from "./QuickActions";
 import WorkspaceCard, { getVisitCounts } from "./WorkspaceCard";
@@ -10,39 +10,32 @@ import {
 } from "../../services/workspaceApi";
 import { getRequestsByCollection } from "../../services/requestApi";
 import "../../styles/dashboard.css";
-
-// Mock shared workspaces — will be replaced by API in Step 6
 const MOCK_SHARED = [
   { id: "s1", name: "Bhoomi's API Project",   description: "Shared collaboration workspace.", createdAt: "2026-06-01T10:00:00", role: "EDITOR",  invitedBy: "Bhoomi Shah"   },
   { id: "s2", name: "Team Auth Service",       description: "Authentication microservice APIs.", createdAt: "2026-05-30T08:00:00", role: "VIEWER",  invitedBy: "Alice Johnson" },
 ];
-
 const ROLE_STYLES = {
   OWNER:  { bg: "#DCFCE7", color: "#16A34A" },
   EDITOR: { bg: "#DBEAFE", color: "#2563EB" },
   VIEWER: { bg: "#EDE9FE", color: "#7C3AED" },
 };
-
 function Dashboard() {
   const [workspaces, setWorkspaces]           = useState([]);
   const [loading, setLoading]                 = useState(true);
   const [collectionCount, setCollectionCount] = useState(null);
   const [requestCount, setRequestCount]       = useState(null);
+  const [drawerOpen, setDrawerOpen]           = useState(false);
   const navigate = useNavigate();
-
   useEffect(() => { loadAll(); }, []);
-
   const loadAll = async () => {
     try {
       const ws = await getWorkspaces();
       setWorkspaces(ws || []);
-
       const collectionArrays = await Promise.all(
         (ws || []).map((w) => getCollectionsByWorkspace(w.id).catch(() => []))
       );
       const allCollections = collectionArrays.flat();
       setCollectionCount(allCollections.length);
-
       const requestArrays = await Promise.all(
         allCollections.map((c) => getRequestsByCollection(c.id).catch(() => []))
       );
@@ -54,42 +47,36 @@ function Dashboard() {
       setLoading(false);
     }
   };
-
-  // Sort by most visited (desc), top 3
   const recentOwned = [...workspaces]
     .sort((a, b) => {
       const counts = getVisitCounts();
       return (counts[b.id] || 0) - (counts[a.id] || 0);
     })
     .slice(0, 3);
-
-  // Top 3 most visited shared workspaces
   const recentShared = [...MOCK_SHARED]
     .sort((a, b) => {
       const counts = getVisitCounts();
       return (counts[b.id] || 0) - (counts[a.id] || 0);
     })
     .slice(0, 3);
-
   const formatDate = (d) => {
     if (!d) return "Recently";
     return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
   };
-
   return (
     <div className="dashboard-container">
-      <Sidebar />
+      <GlobalNavDrawer
+        isOpen={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        activeItem="Dashboard"
+      />
       <main className="dashboard-main">
-        <Topbar />
+        <Topbar onMenuOpen={() => setDrawerOpen(true)} />
         <div className="dashboard-content">
-
-          {/* ── Welcome ── */}
           <div className="welcome-section">
             <h1 className="welcome-title">Welcome back!</h1>
             <p className="welcome-subtitle">Here's what's happening with your API projects today</p>
           </div>
-
-          {/* ── Stats Row ── */}
           <div className="stats-row">
             <div className="stat-card">
               <span className="stat-value">{loading ? "—" : workspaces.length}</span>
@@ -112,11 +99,7 @@ function Dashboard() {
               <span className="stat-label">API Requests</span>
             </div>
           </div>
-
-          {/* ── Quick Actions ── */}
           <QuickActions onWorkspaceCreated={loadAll} />
-
-          {/* ── My Workspaces ── */}
           <div className="workspaces-section">
             <div className="section-header">
               <div className="section-title-group">
@@ -129,7 +112,6 @@ function Dashboard() {
                 </button>
               )}
             </div>
-
             <div className="workspaces-grid">
               {loading ? (
                 <p style={{ color: "var(--text-secondary)", gridColumn: "1 / -1" }}>Loading workspaces...</p>
@@ -146,8 +128,6 @@ function Dashboard() {
               )}
             </div>
           </div>
-
-          {/* ── Shared With Me ── */}
           <div className="workspaces-section">
             <div className="section-header">
               <div className="section-title-group">
@@ -158,7 +138,6 @@ function Dashboard() {
                 View all &rarr;
               </button>
             </div>
-
             <div className="workspaces-grid">
               {MOCK_SHARED.length > 0 ? (
                 recentShared.map((ws) => {
@@ -192,11 +171,9 @@ function Dashboard() {
               )}
             </div>
           </div>
-
         </div>
       </main>
     </div>
   );
 }
-
 export default Dashboard;
