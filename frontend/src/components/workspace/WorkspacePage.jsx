@@ -6,7 +6,7 @@ import {
   Settings, RefreshCw, PlusCircle, Pencil, Trash2,
   FolderPlus, Mail, CheckCircle, ArrowLeft, MailCheck, X,
 } from "lucide-react";
-import GlobalNavDrawer from "../common/GlobalNavDrawer";
+import AppNavbar from "../common/AppNavbar";
 import CollectionCard from "./CollectionCard";
 import EmptyCollectionsState from "./EmptyCollectionsState";
 import MembersPanel from "./MembersPanel";
@@ -281,7 +281,6 @@ const WorkspacePage = () => {
   const [showDelete,   setShowDelete]   = useState(false);
   const [selectedCol,  setSelectedCol]  = useState(null);
   const [pendingCount, setPendingCount] = useState(0);
-  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const currentUserEmail = localStorage.getItem("userEmail") || "";
   const isOwner =
@@ -328,7 +327,7 @@ const WorkspacePage = () => {
   if (loading) {
     return (
       <div className="wp-shell">
-        <GlobalNavDrawer isOpen={drawerOpen} onClose={() => setDrawerOpen(false)} activeItem="Workspaces" />
+        <AppNavbar subtitle="Workspaces" activeItem="Workspaces" />
         <div className="wp-body">
           <div className="wp-loading">
             <div className="wp-spinner"></div>
@@ -341,7 +340,7 @@ const WorkspacePage = () => {
   if (error) {
     return (
       <div className="wp-shell">
-        <GlobalNavDrawer isOpen={drawerOpen} onClose={() => setDrawerOpen(false)} activeItem="Workspaces" />
+        <AppNavbar subtitle="Workspaces" activeItem="Workspaces" />
         <div className="wp-body">
           <div className="wp-center">
             <div className="wp-error-card">
@@ -366,7 +365,7 @@ const WorkspacePage = () => {
   if (!workspace) {
     return (
       <div className="wp-shell">
-        <GlobalNavDrawer isOpen={drawerOpen} onClose={() => setDrawerOpen(false)} activeItem="Workspaces" />
+        <AppNavbar subtitle="Workspaces" activeItem="Workspaces" />
         <div className="wp-body">
           <div className="wp-center">
             <div className="wp-error-card">
@@ -395,34 +394,13 @@ const WorkspacePage = () => {
 
   return (
     <div className="wp-shell">
-      <GlobalNavDrawer isOpen={drawerOpen} onClose={() => setDrawerOpen(false)} activeItem="Workspaces" />
+      <AppNavbar subtitle="Workspaces" activeItem="Workspaces" />
 
       <div className="wp-body">
         <div className="wp-container">
 
           {/* Workspace Header */}
           <div className="wp-header">
-            {/* Hamburger to open GlobalNavDrawer */}
-            <button
-              className="wp-hamburger-btn"
-              onClick={() => setDrawerOpen(true)}
-              aria-label="Open navigation menu"
-              title="Open menu"
-              style={{
-                background: "none", border: "none", cursor: "pointer",
-                padding: "6px 8px", borderRadius: 6, color: "#6B7280",
-                display: "flex", alignItems: "center", marginRight: 8,
-                transition: "background 0.15s, color 0.15s",
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = "#F3F4F6"; e.currentTarget.style.color = "#111827"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "none"; e.currentTarget.style.color = "#6B7280"; }}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="3" y1="6" x2="21" y2="6"></line>
-                <line x1="3" y1="12" x2="21" y2="12"></line>
-                <line x1="3" y1="18" x2="21" y2="18"></line>
-              </svg>
-            </button>
             <div className="wp-header-main">
               <div className="wp-header-content">
                 <h1 className="wp-header-title">{workspace.name}</h1>

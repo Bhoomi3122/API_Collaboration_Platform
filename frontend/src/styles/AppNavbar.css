@@ -1,0 +1,292 @@
+/* ============================================================
+   APP NAVBAR — Shared across ALL pages
+   Height: 48px | White background | Consistent branding
+   ============================================================ */
+
+.app-navbar {
+  height: 48px;
+  background: #ffffff;
+  border-bottom: 1px solid #D0D7DE;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  flex-shrink: 0;
+  z-index: 200;
+  position: relative;
+  /* Lock font so it never inherits from the page (e.g. Inter from cd-shell) */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* ── Left side ──────────────────────────────────────────── */
+.app-navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Hamburger */
+.app-navbar-hamburger {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #57606A;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+  margin-right: 4px;
+}
+
+.app-navbar-hamburger:hover {
+  background: #F6F8FA;
+  color: #24292F;
+}
+
+.app-navbar-hamburger svg {
+  stroke: currentColor;
+}
+
+/* Logo wrapper (clickable → dashboard) */
+.app-navbar-logo-wrap {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  text-decoration: none;
+  user-select: none;
+}
+
+/* Blue icon box */
+.app-navbar-logo-icon {
+  width: 24px;
+  height: 24px;
+  background: #2F81F7;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* "Specify" text */
+.app-navbar-logo-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #24292F;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+/* "|" divider */
+.app-navbar-divider {
+  color: #D0D7DE;
+  font-weight: 300;
+  font-size: 16px;
+  margin: 0 2px;
+  user-select: none;
+}
+
+/* Page subtitle e.g. "Dashboard", "Workspaces" */
+.app-navbar-subtitle {
+  font-size: 13px;
+  color: #57606A;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+/* ── Right side ─────────────────────────────────────────── */
+.app-navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Bell / icon buttons */
+.app-navbar-icon-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #57606A;
+  transition: background 0.15s, color 0.15s;
+}
+
+.app-navbar-icon-btn:hover {
+  background: #F6F8FA;
+  color: #24292F;
+}
+
+/* User profile pill */
+.app-navbar-profile {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+  user-select: none;
+  position: relative;  /* anchor for dropdown */
+}
+
+.app-navbar-profile:hover,
+.app-navbar-profile--open {
+  background: #F6F8FA;
+}
+
+/* Blue avatar circle */
+.app-navbar-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #2F81F7;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+  letter-spacing: 0;
+}
+
+/* Username text */
+.app-navbar-username {
+  font-size: 13px;
+  color: #24292F;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Chevron dropdown arrow */
+.app-navbar-chevron {
+  color: #57606A;
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+
+.app-navbar-chevron--open {
+  transform: rotate(180deg);
+}
+
+/* ── Profile Dropdown ───────────────────────────────────────── */
+
+/* Dropdown container — positioned below profile pill */
+.app-navbar-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 224px;
+  background: #ffffff;
+  border: 1px solid #D0D7DE;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10);
+  z-index: 1000;
+  overflow: hidden;
+  animation: dropdown-in 0.12s ease;
+}
+
+@keyframes dropdown-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Header section — grey bg, shows avatar + name + email */
+.app-navbar-dropdown-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 14px 12px;
+  background: #F6F8FA;
+  border-bottom: 1px solid #D0D7DE;
+}
+
+/* Larger avatar in dropdown header */
+.app-navbar-dropdown-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #2F81F7;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.app-navbar-dropdown-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.app-navbar-dropdown-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #24292F;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.app-navbar-dropdown-email {
+  font-size: 11px;
+  color: #57606A;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Thin divider line */
+.app-navbar-dropdown-divider {
+  height: 1px;
+  background: #D0D7DE;
+  margin: 4px 0;
+}
+
+/* Menu item button */
+.app-navbar-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 14px;
+  background: none;
+  border: none;
+  font-size: 13px;
+  font-weight: 400;
+  color: #24292F;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s, color 0.12s;
+  font-family: inherit;
+}
+
+.app-navbar-menu-item:hover {
+  background: #F6F8FA;
+  color: #24292F;
+}
+
+/* Logout — red */
+.app-navbar-menu-item--danger {
+  color: #D1242F;
+}
+
+.app-navbar-menu-item--danger:hover {
+  background: #FFF0F0;
+  color: #D1242F;
+}
+

@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Bell, ChevronDown, Share2, Settings, Layers } from "lucide-react";
+import { ArrowLeft, Share2, Settings } from "lucide-react";
+import AppNavbar from "../common/AppNavbar";
 import ApiSidebar from "./ApiSidebar";
 import RequestEditor from "./RequestEditor";
 import ResponseViewer from "./ResponseViewer";
 import DeleteRequestModal from "./DeleteRequestModal";
-import GlobalNavDrawer from "../common/GlobalNavDrawer";
 import {
   getRequestsByCollection,
   getRequestById,
@@ -50,7 +50,6 @@ const CollectionDetails = () => {
   const [executionResponse, setExecutionResponse] = useState(null);
   const [executionError, setExecutionError]   = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [drawerOpen, setDrawerOpen]           = useState(false);
 
   // ── Load sidebar list ────────────────────────────────────────
   const fetchRequests = async (reselectId = null) => {
@@ -355,45 +354,10 @@ const CollectionDetails = () => {
   return (
     <div className="cd-shell">
 
-      {/* ── Global Nav Drawer ────────────────────── */}
-      <GlobalNavDrawer
-        isOpen={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-        activeItem=""
-      />
+      {/* ── Global Nav Drawer is handled inside AppNavbar ── */}
 
       {/* ── Top Navbar ──────────────────────────── */}
-      <nav className="cd-navbar">
-        <div className="cd-navbar-left">
-          {/* Hamburger toggle */}
-          <button
-            className="cd-navbar-hamburger"
-            onClick={() => setDrawerOpen(true)}
-            title="Open navigation"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="3" y1="6" x2="21" y2="6"></line>
-              <line x1="3" y1="12" x2="21" y2="12"></line>
-              <line x1="3" y1="18" x2="21" y2="18"></line>
-            </svg>
-          </button>
-          <div className="cd-navbar-logo">
-            <Layers size={14} />
-          </div>
-          <span className="cd-navbar-title">Specify</span>
-          <span className="cd-navbar-divider">|</span>
-          <span className="cd-navbar-subtitle">API Collections</span>
-        </div>
-        <div className="cd-navbar-right">
-          <button className="cd-navbar-icon-btn">
-            <Bell size={16} />
-          </button>
-          <div className="cd-navbar-profile">
-            <div className="cd-navbar-avatar">U</div>
-            <ChevronDown size={14} />
-          </div>
-        </div>
-      </nav>
+      <AppNavbar subtitle="API Collections" activeItem="Workspaces" />
 
       {/* ── Collection Header Card ───────────────── */}
       <header className="cd-header">

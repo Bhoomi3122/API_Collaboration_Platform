@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import GlobalNavDrawer from "../common/GlobalNavDrawer";
 import Topbar from "./Topbar";
 import QuickActions from "./QuickActions";
 import WorkspaceCard, { getVisitCounts } from "./WorkspaceCard";
@@ -24,7 +23,6 @@ function Dashboard() {
   const [loading, setLoading]                 = useState(true);
   const [collectionCount, setCollectionCount] = useState(null);
   const [requestCount, setRequestCount]       = useState(null);
-  const [drawerOpen, setDrawerOpen]           = useState(false);
   const navigate = useNavigate();
   useEffect(() => { loadAll(); }, []);
   const loadAll = async () => {
@@ -65,13 +63,8 @@ function Dashboard() {
   };
   return (
     <div className="dashboard-container">
-      <GlobalNavDrawer
-        isOpen={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-        activeItem="Dashboard"
-      />
       <main className="dashboard-main">
-        <Topbar onMenuOpen={() => setDrawerOpen(true)} />
+        <Topbar />
         <div className="dashboard-content">
           <div className="welcome-section">
             <h1 className="welcome-title">Welcome back!</h1>
