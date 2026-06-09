@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import AppNavbar from "../common/AppNavbar";
 import CreateWorkspaceModal from "../dashboard/CreateWorkspaceModal";
-import { getWorkspaces, deleteWorkspace, updateWorkspace } from "../../services/workspaceApi";
+import { getWorkspaces, getSharedWorkspaces, deleteWorkspace, updateWorkspace } from "../../services/workspaceApi";
 import "../../styles/AllWorkspacesPage.css";
 import "../../styles/CreateCollection.css";
 
@@ -138,11 +138,7 @@ function DeleteWorkspaceModal({ workspace, onConfirm, onCancel, deleting }) {
   );
 }
 
-// Mock shared workspaces
-const MOCK_SHARED = [
-  { id: "s1", name: "Bhoomi's API Project",   description: "Shared collaboration workspace.", createdAt: "2026-06-01T10:00:00", role: "EDITOR", invitedBy: "Bhoomi Shah"   },
-  { id: "s2", name: "Team Auth Service",       description: "Authentication microservice APIs.", createdAt: "2026-05-30T08:00:00", role: "VIEWER", invitedBy: "Alice Johnson" },
-];
+// Mock shared workspaces - REMOVED (now using real data)
 
 const ROLE_STYLES = {
   OWNER:  { bg: "#DCFCE7", color: "#16A34A" },
@@ -155,6 +151,7 @@ function AllWorkspacesPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [workspaces, setWorkspaces]                 = useState([]);
+  const [sharedWorkspaces, setSharedWorkspaces]     = useState([]);
   const [filteredWorkspaces, setFilteredWorkspaces] = useState([]);
   const [searchQuery, setSearchQuery]               = useState("");
   const [loading, setLoading]                       = useState(true);
@@ -173,20 +170,25 @@ function AllWorkspacesPage() {
 
   useEffect(() => {
     if (searchQuery.trim() === "") {
-      setFilteredWorkspaces(workspaces);
+      setFilteredWorkspaces(activeTab === "mine" ? workspaces : sharedWorkspaces);
     } else {
+      const dataToFilter = activeTab === "mine" ? workspaces : sharedWorkspaces;
       setFilteredWorkspaces(
-        workspaces.filter((w) => w.name.toLowerCase().includes(searchQuery.toLowerCase()))
+        dataToFilter.filter((w) => w.name.toLowerCase().includes(searchQuery.toLowerCase()))
       );
     }
-  }, [searchQuery, workspaces]);
+  }, [searchQuery, workspaces, sharedWorkspaces, activeTab]);
 
   const loadWorkspaces = async () => {
     try {
       setLoading(true); setError(null);
-      const data = await getWorkspaces();
-      setWorkspaces(data);
-      setFilteredWorkspaces(data);
+      const [ownedData, sharedData] = await Promise.all([
+        getWorkspaces(),
+        getSharedWorkspaces()
+      ]);
+      setWorkspaces(ownedData);
+      setSharedWorkspaces(sharedData);
+      setFilteredWorkspaces(activeTab === "mine" ? ownedData : sharedData);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to load workspaces");
     } finally {
@@ -230,10 +232,20 @@ function AllWorkspacesPage() {
 
   const renderContent = () => {
     if (activeTab === "shared") {
-      const filtered = searchQuery.trim()
-        ? MOCK_SHARED.filter((w) => w.name.toLowerCase().includes(searchQuery.toLowerCase()))
-        : MOCK_SHARED;
-      if (filtered.length === 0) {
+      if (loading) {
+        return (
+          <div className="workspaces-grid">
+            {[1,2,3,4].map((i) => (
+              <div key={i} className="workspace-card-skeleton">
+                <div className="skeleton-header"></div>
+                <div className="skeleton-description"></div>
+                <div className="skeleton-footer"></div>
+              </div>
+            ))}
+          </div>
+        );
+      }
+      if (filteredWorkspaces.length === 0) {
         return (
           <div className="workspaces-empty-state">
             <div className="empty-icon"><Search /></div>
@@ -244,7 +256,7 @@ function AllWorkspacesPage() {
       }
       return (
         <div className="workspaces-grid">
-          {filtered.map((ws) => {
+          {filteredWorkspaces.map((ws) => {
             const rs = ROLE_STYLES[ws.role] || ROLE_STYLES.VIEWER;
             return (
               <div key={ws.id} className="all-workspace-card" onClick={() => navigate(`/workspace/${ws.id}`)}>
@@ -261,7 +273,6 @@ function AllWorkspacesPage() {
                     <Calendar size={12} />
                     <span>Created {formatDate(ws.createdAt)}</span>
                   </div>
-                  <span style={{ fontSize: 11, color: "#9CA3AF" }}>by {ws.invitedBy}</span>
                 </div>
               </div>
             );
@@ -385,7 +396,7 @@ function AllWorkspacesPage() {
               onClick={() => setActiveTab("shared")}
             >
               Shared With Me
-              <span className="ws-tab-count">{MOCK_SHARED.length}</span>
+              <span className="ws-tab-count">{loading ? "…" : sharedWorkspaces.length}</span>
             </button>
           </div>
 

@@ -33,6 +33,12 @@ public class WorkspaceController {
         return ResponseEntity.ok().body(workspaceService.getUserWorkspaces());
     }
 
+    @GetMapping("/shared")
+    public ResponseEntity<List<WorkspaceResponse>> getSharedWorkspaces()
+    {
+        return ResponseEntity.ok().body(workspaceService.getSharedWorkspaces());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<WorkspaceResponse> getWorkspaceById(
             @PathVariable Long id

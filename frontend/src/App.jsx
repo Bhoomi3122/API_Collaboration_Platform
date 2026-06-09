@@ -7,6 +7,7 @@ import AllWorkspacesPage from "./components/workspace/AllWorkspacesPage";
 import WorkspacePage from "./components/workspace/WorkspacePage";
 import CollectionDetails from "./components/request/CollectionDetails";
 import InvitationsPage from "./components/dashboard/InvitationsPage";
+import ProfilePage from "./components/profile/ProfilePage";
 import { isAuthenticated } from "./utils/auth";
 
 function App() {
@@ -75,6 +76,14 @@ function App() {
           element={
             <ProtectedRoute>
               <InvitationsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
             </ProtectedRoute>
           }
         />

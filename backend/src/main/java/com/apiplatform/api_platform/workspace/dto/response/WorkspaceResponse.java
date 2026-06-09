@@ -16,4 +16,5 @@ public class WorkspaceResponse {
     private String name;
     private String description;
     private LocalDateTime createdAt;
+    private String role; // OWNER, EDITOR, VIEWER
 }

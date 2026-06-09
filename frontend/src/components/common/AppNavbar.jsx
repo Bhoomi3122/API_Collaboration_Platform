@@ -137,7 +137,6 @@ const AppNavbar = ({ subtitle = "", activeItem = "" }) => {
                   </div>
                 </div>
 
-                <div className="app-navbar-dropdown-divider" />
 
                 {/* Menu items */}
                 {menuItem(User, "My Profile", () => navigate("/profile"))}

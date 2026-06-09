@@ -17,6 +17,12 @@ export const getWorkspaces = async () => {
   return response.data;
 };
 
+// Get shared workspaces
+export const getSharedWorkspaces = async () => {
+  const response = await apiClient.get("/workspaces/shared");
+  return response.data;
+};
+
 // Create a new workspace
 export const createWorkspace = async (workspaceData) => {
   const response = await apiClient.post("/workspaces", workspaceData);

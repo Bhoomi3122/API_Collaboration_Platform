@@ -9,7 +9,9 @@ import com.apiplatform.api_platform.apiRequest.repository.ApiRequestRepository;
 import com.apiplatform.api_platform.workspace.dto.request.CreateWorkspaceRequest;
 import com.apiplatform.api_platform.workspace.dto.response.WorkspaceResponse;
 import com.apiplatform.api_platform.workspace.entity.Workspace;
+import com.apiplatform.api_platform.workspace.entity.WorkspaceMember;
 import com.apiplatform.api_platform.workspace.exception.WorkspaceNotFoundException;
+import com.apiplatform.api_platform.workspace.repository.WorkspaceMemberRepository;
 import com.apiplatform.api_platform.workspace.repository.WorkspaceRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -24,14 +26,17 @@ public class WorkspaceService {
     private UserRepository userRepository;
     private CollectionRepository collectionRepository;
     private ApiRequestRepository apiRequestRepository;
+    private WorkspaceMemberRepository workspaceMemberRepository;
 
     public WorkspaceService(WorkspaceRepository workspaceRepository, UserRepository userRepository,
-                            CollectionRepository collectionRepository, ApiRequestRepository apiRequestRepository)
+                            CollectionRepository collectionRepository, ApiRequestRepository apiRequestRepository,
+                            WorkspaceMemberRepository workspaceMemberRepository)
     {
         this.workspaceRepository = workspaceRepository;
         this.userRepository = userRepository;
         this.collectionRepository = collectionRepository;
         this.apiRequestRepository = apiRequestRepository;
+        this.workspaceMemberRepository = workspaceMemberRepository;
     }
 
     private WorkspaceResponse convertWorkspaceToResponse(Workspace workspace)
@@ -68,7 +73,27 @@ public class WorkspaceService {
         List<Workspace> workspaces = workspaceRepository.findByOwner(user);
         for(Workspace workspace:workspaces)
         {
-            workspaceResponses.add(convertWorkspaceToResponse(workspace));
+            WorkspaceResponse response = convertWorkspaceToResponse(workspace);
+            response.setRole("OWNER");
+            workspaceResponses.add(response);
+        }
+        return workspaceResponses;
+    }
+
+    public List<WorkspaceResponse> getSharedWorkspaces()
+    {
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+        User user = userRepository.findByEmail(email).orElseThrow(()->new UserNotFoundException("User not found"));
+        List<WorkspaceResponse> workspaceResponses = new ArrayList<>();
+        List<WorkspaceMember> memberships = workspaceMemberRepository.findByUser(user);
+        for(WorkspaceMember member:memberships)
+        {
+            WorkspaceResponse response = convertWorkspaceToResponse(member.getWorkspace());
+            // Add role information to the response
+            response.setRole(member.getRole().name());
+            workspaceResponses.add(response);
         }
         return workspaceResponses;
     }
