@@ -86,6 +86,13 @@ public class ApiRequestService {
         response.setCollectionId(apiRequest.getCollection().getId());
         response.setCreatedAt(apiRequest.getCreatedAt());
         response.setDescription(apiRequest.getDescription());
+        // Auth fields — returned so the UI can pre-fill the Authorization tab
+        response.setAuthType(apiRequest.getAuthType());
+        response.setAuthToken(apiRequest.getAuthToken());
+        response.setAuthUsername(apiRequest.getAuthUsername());
+        response.setAuthPassword(apiRequest.getAuthPassword());
+        response.setAuthApiKeyName(apiRequest.getAuthApiKeyName());
+        response.setAuthApiKeyValue(apiRequest.getAuthApiKeyValue());
         return response;
     }
 
@@ -104,11 +111,18 @@ public class ApiRequestService {
         apiRequest.setHeaders(request.getHeaders());
         apiRequest.setBody(request.getBody());
         apiRequest.setCollection(collection);
+        // Persist auth fields so the Auth tab is fully restored on reload
+        apiRequest.setAuthType(request.getAuthType());
+        apiRequest.setAuthToken(request.getAuthToken());
+        apiRequest.setAuthUsername(request.getAuthUsername());
+        apiRequest.setAuthPassword(request.getAuthPassword());
+        apiRequest.setAuthApiKeyName(request.getAuthApiKeyName());
+        apiRequest.setAuthApiKeyValue(request.getAuthApiKeyValue());
 
         ApiRequest savedRequest = apiRequestRepository.save(apiRequest);
         activityService.createActivity(
                 ActivityType.ENDPOINT_CREATED,
-                savedRequest.getMethod() + " " + savedRequest.getUrl() + " created",
+                "Endpoint '" + savedRequest.getName() + "' created",
                 collection.getWorkspace(),
                 collection,
                 getCurrentUser()
@@ -179,11 +193,18 @@ public class ApiRequestService {
         existing.setDescription(request.getDescription());
         existing.setHeaders(request.getHeaders());
         existing.setBody(request.getBody());
+        // Update auth fields so the Auth tab stays in sync with saved state
+        existing.setAuthType(request.getAuthType());
+        existing.setAuthToken(request.getAuthToken());
+        existing.setAuthUsername(request.getAuthUsername());
+        existing.setAuthPassword(request.getAuthPassword());
+        existing.setAuthApiKeyName(request.getAuthApiKeyName());
+        existing.setAuthApiKeyValue(request.getAuthApiKeyValue());
 
         ApiRequest updatedRequest = apiRequestRepository.save(existing);
         activityService.createActivity(
                 ActivityType.ENDPOINT_UPDATED,
-                updatedRequest.getMethod() + " " + updatedRequest.getUrl() + " updated",
+                "Endpoint '" + updatedRequest.getName() + "' updated",
                 updatedRequest.getCollection().getWorkspace(),
                 updatedRequest.getCollection(),
                 getCurrentUser()
@@ -213,7 +234,7 @@ public class ApiRequestService {
 
         activityService.createActivity(
                 ActivityType.ENDPOINT_DELETED,
-                apiRequest.getMethod() + " " + apiRequest.getUrl() + " deleted",
+                "Endpoint '" + apiRequest.getName() + "' deleted",
                 apiRequest.getCollection().getWorkspace(),
                 apiRequest.getCollection(),
                 getCurrentUser()

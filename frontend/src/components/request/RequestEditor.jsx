@@ -5,6 +5,26 @@ const HTTP_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"
 const TABS = ["Docs", "Params", "Authorization", "Headers", "Body", "Scripts", "Settings"];
 const AUTH_TYPES = ["No Auth", "Bearer Token", "Basic Auth", "API Key"];
 
+// Maps UI-friendly auth type names to backend enum values
+const toBackendAuthType = (uiType) => {
+  switch (uiType) {
+    case "Bearer Token": return "BEARER_TOKEN";
+    case "Basic Auth":   return "BASIC_AUTH";
+    case "API Key":      return "API_KEY";
+    default:             return "NONE";
+  }
+};
+
+// Reverse: maps backend enum values back to UI-friendly names (for pre-filling)
+const toUIAuthType = (backendType) => {
+  switch (backendType) {
+    case "BEARER_TOKEN": return "Bearer Token";
+    case "BASIC_AUTH":   return "Basic Auth";
+    case "API_KEY":      return "API Key";
+    default:             return "No Auth";
+  }
+};
+
 // ── Method colour map ───────────────────────────────────────────
 const METHOD_COLORS = {
   GET:     { color: "#2F9E44", bg: "#E6F4EA" },
@@ -111,20 +131,27 @@ const KVTable = ({ colHeaders, placeholder }) => {
   );
 };
 
-// ── Authorization Tab ───────────────────────────────────────────
-const AuthTab = () => {
-  const [authType, setAuthType] = useState("No Auth");
+// ── Authorization Tab (controlled — state lives in RequestEditor) ───────────
+const AuthTab = ({
+  authType, onAuthTypeChange,
+  authToken, onAuthTokenChange,
+  authUsername, onAuthUsernameChange,
+  authPassword, onAuthPasswordChange,
+  authApiKeyName, onAuthApiKeyNameChange,
+  authApiKeyValue, onAuthApiKeyValueChange,
+}) => {
   return (
     <div>
       <select className="cd-auth-select" value={authType}
-        onChange={(e) => setAuthType(e.target.value)}>
+        onChange={(e) => onAuthTypeChange(e.target.value)}>
         {AUTH_TYPES.map((t) => <option key={t}>{t}</option>)}
       </select>
 
       {authType === "Bearer Token" && (
         <div className="cd-auth-field">
           <label className="cd-auth-label">Token</label>
-          <input className="cd-auth-input" placeholder="Enter bearer token..." type="password" />
+          <input className="cd-auth-input" placeholder="Enter bearer token..." type="password"
+            value={authToken} onChange={(e) => onAuthTokenChange(e.target.value)} />
         </div>
       )}
 
@@ -132,11 +159,13 @@ const AuthTab = () => {
         <>
           <div className="cd-auth-field">
             <label className="cd-auth-label">Username</label>
-            <input className="cd-auth-input" placeholder="Enter username..." />
+            <input className="cd-auth-input" placeholder="Enter username..."
+              value={authUsername} onChange={(e) => onAuthUsernameChange(e.target.value)} />
           </div>
           <div className="cd-auth-field">
             <label className="cd-auth-label">Password</label>
-            <input className="cd-auth-input" placeholder="Enter password..." type="password" />
+            <input className="cd-auth-input" placeholder="Enter password..." type="password"
+              value={authPassword} onChange={(e) => onAuthPasswordChange(e.target.value)} />
           </div>
         </>
       )}
@@ -144,12 +173,14 @@ const AuthTab = () => {
       {authType === "API Key" && (
         <>
           <div className="cd-auth-field">
-            <label className="cd-auth-label">Key</label>
-            <input className="cd-auth-input" placeholder="Header name (e.g. X-API-Key)" />
+            <label className="cd-auth-label">Key (Header Name)</label>
+            <input className="cd-auth-input" placeholder="e.g. X-API-Key"
+              value={authApiKeyName} onChange={(e) => onAuthApiKeyNameChange(e.target.value)} />
           </div>
           <div className="cd-auth-field">
             <label className="cd-auth-label">Value</label>
-            <input className="cd-auth-input" placeholder="API key value..." type="password" />
+            <input className="cd-auth-input" placeholder="API key value..." type="password"
+              value={authApiKeyValue} onChange={(e) => onAuthApiKeyValueChange(e.target.value)} />
           </div>
         </>
       )}
@@ -206,7 +237,16 @@ const RequestEditor = ({ request, onSave, onDelete, onExecute, onSaveAndSend, sa
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  // Sync editor fields whenever the selected request changes
+  // ── Auth state lifted here so it flows into execution payloads ──
+  const [authType,       setAuthType]       = useState("No Auth");
+  const [authToken,      setAuthToken]      = useState("");
+  const [authUsername,   setAuthUsername]   = useState("");
+  const [authPassword,   setAuthPassword]   = useState("");
+  const [authApiKeyName, setAuthApiKeyName] = useState("");
+  const [authApiKeyValue,setAuthApiKeyValue]= useState("");
+
+  // Sync editor fields whenever the selected request changes;
+  // restore all saved fields including the Auth tab
   useEffect(() => {
     if (request) {
       setMethod(request.method || "GET");
@@ -214,6 +254,14 @@ const RequestEditor = ({ request, onSave, onDelete, onExecute, onSaveAndSend, sa
       setBody(request.body || "");
       setHeaders(request.headers || {});
       setActiveTab("Body");
+      // Restore auth — if the request was saved with auth it will be pre-filled,
+      // otherwise defaults to "No Auth" / empty strings
+      setAuthType(toUIAuthType(request.authType));
+      setAuthToken(request.authToken || "");
+      setAuthUsername(request.authUsername || "");
+      setAuthPassword(request.authPassword || "");
+      setAuthApiKeyName(request.authApiKeyName || "");
+      setAuthApiKeyValue(request.authApiKeyValue || "");
     }
   }, [request?.id]);
 
@@ -230,13 +278,13 @@ const RequestEditor = ({ request, onSave, onDelete, onExecute, onSaveAndSend, sa
   const methodStyle = METHOD_COLORS[method] || METHOD_COLORS.GET; // kept for badge use
 
   // Helper function to ensure headers are always sent as an object
-  const parseHeaders = (headers) => {
-    if (typeof headers === "object" && headers !== null && !Array.isArray(headers)) {
-      return headers;
+  const parseHeaders = (hdrs) => {
+    if (typeof hdrs === "object" && hdrs !== null && !Array.isArray(hdrs)) {
+      return hdrs;
     }
-    if (typeof headers === "string" && headers.trim()) {
+    if (typeof hdrs === "string" && hdrs.trim()) {
       try {
-        const parsed = JSON.parse(headers);
+        const parsed = JSON.parse(hdrs);
         if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)) {
           return parsed;
         }
@@ -246,6 +294,20 @@ const RequestEditor = ({ request, onSave, onDelete, onExecute, onSaveAndSend, sa
     }
     return {};
   };
+
+  // Build full execution payload including auth fields for the backend proxy
+  const buildExecutePayload = () => ({
+    method,
+    url,
+    headers: parseHeaders(headers),
+    body,
+    authType:        toBackendAuthType(authType),
+    authToken,
+    authUsername,
+    authPassword,
+    authApiKeyName,
+    authApiKeyValue,
+  });
 
   return (
     <div className="cd-editor">
@@ -280,7 +342,7 @@ const RequestEditor = ({ request, onSave, onDelete, onExecute, onSaveAndSend, sa
           <button
             className="cd-send-btn"
             onClick={() => {
-              if (onExecute) onExecute({ method, url, headers: parseHeaders(headers), body });
+              if (onExecute) onExecute(buildExecutePayload());
             }}
             disabled={executing || !url.trim()}
           >
@@ -301,7 +363,7 @@ const RequestEditor = ({ request, onSave, onDelete, onExecute, onSaveAndSend, sa
                 disabled={saving}
                 onClick={() => {
                   setDropdownOpen(false);
-                  if (onSave) onSave({ method, url, headers: parseHeaders(headers), body });
+                  if (onSave) onSave(buildExecutePayload());
                 }}
               >
                 {saving ? "Saving..." : "Save Request"}
@@ -311,7 +373,7 @@ const RequestEditor = ({ request, onSave, onDelete, onExecute, onSaveAndSend, sa
                 disabled={saving || executing}
                 onClick={() => {
                   setDropdownOpen(false);
-                  if (onSaveAndSend) onSaveAndSend({ method, url, headers: parseHeaders(headers), body });
+                  if (onSaveAndSend) onSaveAndSend(buildExecutePayload());
                 }}
               >
                 {saving || executing ? "Processing..." : "Save & Send"}
@@ -323,7 +385,7 @@ const RequestEditor = ({ request, onSave, onDelete, onExecute, onSaveAndSend, sa
                   disabled={saving}
                   onClick={() => {
                     setDropdownOpen(false);
-                    if (onSave) onSave({ method, url, headers: parseHeaders(headers), body });
+                    if (onSave) onSave(buildExecutePayload());
                   }}
                 >
                   {saving ? "Updating..." : "Update Request"}
@@ -375,7 +437,16 @@ const RequestEditor = ({ request, onSave, onDelete, onExecute, onSaveAndSend, sa
           />
         )}
 
-        {activeTab === "Authorization" && <AuthTab />}
+        {activeTab === "Authorization" && (
+          <AuthTab
+            authType={authType}           onAuthTypeChange={setAuthType}
+            authToken={authToken}          onAuthTokenChange={setAuthToken}
+            authUsername={authUsername}    onAuthUsernameChange={setAuthUsername}
+            authPassword={authPassword}    onAuthPasswordChange={setAuthPassword}
+            authApiKeyName={authApiKeyName}     onAuthApiKeyNameChange={setAuthApiKeyName}
+            authApiKeyValue={authApiKeyValue}   onAuthApiKeyValueChange={setAuthApiKeyValue}
+          />
+        )}
 
         {activeTab === "Headers" && (
           <textarea

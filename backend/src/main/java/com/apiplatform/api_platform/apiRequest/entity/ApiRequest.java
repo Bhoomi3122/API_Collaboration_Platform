@@ -42,6 +42,27 @@ public class ApiRequest {
     @Column(columnDefinition = "TEXT")
     private String body;
 
+    // ── Authorization (persisted per request) ──────────────────────────────────
+    // Stored so the Auth tab is fully pre-filled when the request is reopened.
+
+    @Column
+    private String authType;          // NONE | BEARER_TOKEN | BASIC_AUTH | API_KEY
+
+    @Column(columnDefinition = "TEXT")
+    private String authToken;         // Bearer token value
+
+    @Column
+    private String authUsername;      // Basic Auth username
+
+    @Column(columnDefinition = "TEXT")
+    private String authPassword;      // Basic Auth password
+
+    @Column
+    private String authApiKeyName;    // API Key header name (e.g. X-API-Key)
+
+    @Column(columnDefinition = "TEXT")
+    private String authApiKeyValue;   // API Key value
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

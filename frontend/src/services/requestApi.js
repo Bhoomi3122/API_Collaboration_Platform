@@ -70,48 +70,18 @@ export const executeRequest = async (id) => {
   }
 };
 
-// Execute a request directly (ad-hoc, unsaved) — calls the URL from the browser
-export const executeDirectRequest = async ({ method, url, headers, body }) => {
-  const axios = (await import("axios")).default;
-
-  // Parse headers — accept object or JSON string
-  let parsedHeaders = {};
-  if (headers && typeof headers === "object") {
-    parsedHeaders = headers;
-  } else if (headers && typeof headers === "string" && headers.trim()) {
-    try { parsedHeaders = JSON.parse(headers); } catch { /* ignore */ }
+// Execute a request ad-hoc via the backend proxy (no save required).
+// Payload shape matches AdHocExecuteRequest on the backend:
+//   { method, url, headers, body, authType, authToken, authUsername,
+//     authPassword, authApiKeyName, authApiKeyValue }
+// Returns ApiExecutionResponse shape:
+//   { statusCode, responseBody, responseTime, responseHeaders }
+export const executeDirectRequest = async (payload) => {
+  try {
+    const response = await apiClient.post("/requests/execute", payload);
+    return response.data;
+  } catch (error) {
+    console.error("Error executing request via backend:", error);
+    throw error;
   }
-
-  const config = {
-    method: method || "GET",
-    url,
-    headers: parsedHeaders,
-    // Never throw for any HTTP status — let the caller handle all responses uniformly
-    validateStatus: () => true,
-  };
-
-  if (body && typeof body === "string" && body.trim() &&
-      ["POST", "PUT", "PATCH"].includes((method || "").toUpperCase())) {
-    try {
-      config.data = JSON.parse(body);
-      if (!parsedHeaders["Content-Type"] && !parsedHeaders["content-type"]) {
-        config.headers["Content-Type"] = "application/json";
-      }
-    } catch {
-      config.data = body;
-    }
-  }
-
-  const start = Date.now();
-  const response = await axios(config);
-  const duration = Date.now() - start;
-
-  return {
-    status: response.status,
-    statusText: response.statusText,
-    duration,
-    size: JSON.stringify(response.data).length,
-    data: response.data,
-    headers: response.headers,
-  };
 };
