@@ -6,11 +6,15 @@ import ApiSidebar from "./ApiSidebar";
 import RequestEditor from "./RequestEditor";
 import ResponseViewer from "./ResponseViewer";
 import DeleteRequestModal from "./DeleteRequestModal";
+import NameRequestModal from "./NameRequestModal";
+import RenameRequestModal from "./RenameRequestModal";
+import Toast from "../common/Toast";
 import {
   getRequestsByCollection,
   getRequestById,
   createRequest,
   updateRequest,
+  renameRequest,
   deleteRequest,
   executeRequest,
   executeDirectRequest,
@@ -48,8 +52,17 @@ const CollectionDetails = () => {
   const [saveMessage, setSaveMessage]         = useState(null);
   const [executing, setExecuting]             = useState(false);
   const [executionResponse, setExecutionResponse] = useState(null);
-  const [executionError, setExecutionError]   = useState(null);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [executionError, setExecutionError]       = useState(null);
+  const [showDeleteModal, setShowDeleteModal]     = useState(false);
+  const [showNameModal, setShowNameModal]         = useState(false);
+  const [showRenameModal, setShowRenameModal]     = useState(false);
+  const [requestToDelete, setRequestToDelete]     = useState(null);
+  const [requestToRename, setRequestToRename]     = useState(null);
+  const [renaming, setRenaming]                   = useState(false);
+  const [toast, setToast]                         = useState(null);
+
+  // Get current user email for permission checks
+  const currentUserEmail = localStorage.getItem("userEmail") || "";
 
   // ── Load sidebar list ────────────────────────────────────────
   const fetchRequests = async (reselectId = null) => {
@@ -70,7 +83,6 @@ const CollectionDetails = () => {
         await handleSelectRequest(data[0].id, false);
       }
     } catch (error) {
-      console.error("Failed to load requests:", error);
       setListError("Failed to load requests. Please refresh.");
       setRequests([]);
     } finally {
@@ -86,11 +98,13 @@ const CollectionDetails = () => {
           setCollection(col);
           if (col?.workspaceId) {
             getWorkspaceById(col.workspaceId)
-              .then(setWorkspace)
-              .catch((err) => console.error("Failed to load workspace:", err));
+              .then((ws) => {
+                setWorkspace(ws);
+              })
+              .catch((err) => {});
           }
         })
-        .catch((err) => console.error("Failed to load collection:", err));
+        .catch((err) => {});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [collectionId]);
@@ -105,7 +119,6 @@ const CollectionDetails = () => {
       const full = await getRequestById(id);
       setSelectedRequest(full);
     } catch (error) {
-      console.error("Failed to load request details:", error);
       setRequestError("Failed to load request details.");
     } finally {
       if (showLoading) setRequestLoading(false);
@@ -137,7 +150,6 @@ const CollectionDetails = () => {
       const result = await executeDirectRequest(payload);
       setExecutionResponse(result);
     } catch (error) {
-      console.error("Execution failed:", error);
       // Axios throws for network-level failures (no response from our backend)
       if (error.response) {
         const errData = error.response.data;
@@ -161,6 +173,15 @@ const CollectionDetails = () => {
 
   // ── Save and Send (save first, then execute via backend proxy) ───────────
   const handleSaveAndSend = async (editorState) => {
+    // Check if request needs naming (new request or still unnamed)
+    if (!selectedRequest?.id || !selectedRequest?.name || selectedRequest.name === "Untitled Request") {
+      // Show naming modal
+      setShowNameModal(true);
+      // Store the editor state for later use after naming
+      window.pendingSaveAction = { type: 'saveAndSend', editorState };
+      return;
+    }
+
     // First save the request
     setSaving(true);
     setSaveMessage(null);
@@ -206,7 +227,6 @@ const CollectionDetails = () => {
         setExecutionResponse(result);
         setTimeout(() => setSaveMessage(null), 3000);
       } catch (execError) {
-        console.error("Execution failed:", execError);
         if (execError.response) {
           const errData = execError.response.data;
           setExecutionResponse({
@@ -228,7 +248,6 @@ const CollectionDetails = () => {
       }
 
     } catch (error) {
-      console.error("Save failed:", error);
       setSaveMessage({ type: "error", text: "Failed to save request. Please try again." });
       setTimeout(() => setSaveMessage(null), 4000);
       setSaving(false);
@@ -237,6 +256,15 @@ const CollectionDetails = () => {
 
   // ── Save (create or update) ──────────────────────────────────
   const handleSave = async (editorState) => {
+    // Check if request needs naming (new request or still unnamed)
+    if (!selectedRequest?.id || !selectedRequest?.name || selectedRequest.name === "Untitled Request") {
+      // Show naming modal
+      setShowNameModal(true);
+      // Store the editor state for later use after naming
+      window.pendingSaveAction = { type: 'save', editorState };
+      return;
+    }
+
     setSaving(true);
     setSaveMessage(null);
     try {
@@ -267,7 +295,6 @@ const CollectionDetails = () => {
       await fetchRequests(saved.id);
       setTimeout(() => setSaveMessage(null), 3000);
     } catch (error) {
-      console.error("Save failed:", error);
       setSaveMessage({ type: "error", text: "Failed to save request. Please try again." });
       setTimeout(() => setSaveMessage(null), 4000);
     } finally {
@@ -278,6 +305,12 @@ const CollectionDetails = () => {
   // ── Delete ───────────────────────────────────────────────────
   const handleDelete = () => {
     if (!selectedRequest?.id) return;
+    setRequestToDelete(selectedRequest);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteFromSidebar = (req) => {
+    setRequestToDelete(req);
     setShowDeleteModal(true);
   };
 
@@ -288,22 +321,187 @@ const CollectionDetails = () => {
       if (data.length > 0) await handleSelectRequest(data[0].id, false);
       else setSelectedRequest(null);
     } catch (error) {
-      console.error("Failed to refresh requests after delete:", error);
+      // Handle error silently
     }
   };
 
   // ── New (unsaved) request blank template ────────────────────
   const handleNewRequest = () => {
+    // Simply create a blank template without showing the modal
     setSelectedRequest({
-      name:    "New Request",
-      method:  "GET",
-      url:     "",
+      id: null,
+      name: "Untitled Request",
+      method: "GET",
+      url: "",
       headers: {},
-      body:    "",
+      body: "",
     });
-    setRequestError(null);
     setExecutionResponse(null);
     setExecutionError(null);
+  };
+
+  const handleNameRequestSubmit = async (name) => {
+    // Check if there's a pending save action
+    const pendingAction = window.pendingSaveAction;
+    if (pendingAction) {
+      // Clear the pending action
+      window.pendingSaveAction = null;
+
+      // Create/update request with the given name
+      try {
+        setSaving(true);
+        const editorState = pendingAction.editorState;
+        const payload = {
+          name:            name,
+          method:          editorState.method,
+          url:             editorState.url,
+          headers:         editorState.headers,
+          body:            editorState.body,
+          collectionId:    Number(collectionId),
+          authType:        editorState.authType,
+          authToken:       editorState.authToken,
+          authUsername:    editorState.authUsername,
+          authPassword:    editorState.authPassword,
+          authApiKeyName:  editorState.authApiKeyName,
+          authApiKeyValue: editorState.authApiKeyValue,
+        };
+
+        let saved;
+        if (selectedRequest?.id) {
+          saved = await updateRequest(selectedRequest.id, payload);
+        } else {
+          saved = await createRequest(payload);
+        }
+
+        await fetchRequests(saved.id);
+
+        // If this was a saveAndSend action, execute the request
+        if (pendingAction.type === 'saveAndSend') {
+          setSaveMessage({ type: "success", text: "Request saved successfully." });
+          setExecuting(true);
+          setSaving(false);
+
+          try {
+            const result = await executeDirectRequest(editorState);
+            setExecutionResponse(result);
+            setTimeout(() => setSaveMessage(null), 3000);
+          } catch (execError) {
+            if (execError.response) {
+              const errData = execError.response.data;
+              setExecutionResponse({
+                statusCode:      execError.response.status,
+                responseBody:    typeof errData === "string" ? errData : JSON.stringify(errData, null, 2),
+                responseTime:    null,
+                responseHeaders: execError.response.headers || {},
+              });
+              setSaveMessage({ type: "success", text: "Request saved." });
+            } else {
+              setExecutionError(
+                execError.message || "Request saved but execution failed. Please try again."
+              );
+              setSaveMessage({ type: "success", text: "Request saved. Execution failed." });
+            }
+            setTimeout(() => setSaveMessage(null), 4000);
+          } finally {
+            setExecuting(false);
+          }
+        } else {
+          setSaveMessage({ type: "success", text: "Request saved successfully." });
+          setTimeout(() => setSaveMessage(null), 3000);
+          setSaving(false);
+        }
+      } catch (error) {
+        setSaveMessage({ type: "error", text: "Failed to save request. Please try again." });
+        setTimeout(() => setSaveMessage(null), 4000);
+        setSaving(false);
+      }
+    }
+  };
+
+  // ── Rename ───────────────────────────────────────────────────
+  const handleRenameFromSidebar = (req) => {
+    // Ensure workspace is loaded
+    if (!workspace) {
+      setToast({
+        message: "Loading workspace data. Please try again in a moment.",
+        type: "warning"
+      });
+      return;
+    }
+
+    // Check permissions - only OWNER and EDITOR can rename
+    // The workspace.role field contains the current user's role in the workspace
+    const userRole = workspace.role;
+
+
+    if (userRole !== "OWNER" && userRole !== "EDITOR") {
+      setToast({
+        message: "You don't have permission to rename requests. Only workspace owners and editors can rename requests.",
+        type: "error"
+      });
+      return;
+    }
+
+    setRequestToRename(req);
+    setShowRenameModal(true);
+  };
+
+  const handleRenameSubmit = async (newName) => {
+    if (!requestToRename) return;
+
+    const oldName = requestToRename.name;
+    const id = requestToRename.id;
+
+    setRenaming(true);
+
+    // Optimistically update the requests array
+    setRequests(prevRequests =>
+      prevRequests.map(req =>
+        req.id === id ? { ...req, name: newName } : req
+      )
+    );
+
+    // Also update selectedRequest if it's the one being renamed
+    if (selectedRequest?.id === id) {
+      setSelectedRequest(prev => ({ ...prev, name: newName }));
+    }
+
+    try {
+      await renameRequest(id, newName);
+      // Fetch fresh data to ensure consistency
+      await fetchRequests(id);
+      setShowRenameModal(false);
+      setRequestToRename(null);
+      setToast({
+        message: "Request renamed successfully!",
+        type: "success"
+      });
+    } catch (error) {
+      // Revert optimistic update on error
+      setRequests(prevRequests =>
+        prevRequests.map(req =>
+          req.id === id ? { ...req, name: oldName } : req
+        )
+      );
+      if (selectedRequest?.id === id) {
+        setSelectedRequest(prev => ({ ...prev, name: oldName }));
+      }
+
+      // Check if it's a 403 error
+      if (error.response?.status === 403) {
+        setToast({
+          message: "You don't have permission to rename this request. Only workspace owners and editors can rename requests.",
+          type: "error"
+        });
+      } else {
+        setToast({
+          message: "Failed to rename request. Please try again.",
+          type: "error"
+        });
+      }
+    } finally {
+      setRenaming(false);
+    }
   };
 
   // ── Derive main panel content ────────────────────────────────
@@ -430,6 +628,8 @@ const CollectionDetails = () => {
           selectedId={selectedRequest?.id}
           onSelect={(req) => handleSelectRequest(req.id)}
           onNewRequest={handleNewRequest}
+          onRename={handleRenameFromSidebar}
+          onDelete={handleDeleteFromSidebar}
         />
 
         <div className="cd-main">
@@ -441,10 +641,43 @@ const CollectionDetails = () => {
       {/* ── Delete Request Modal ─────────────────── */}
       <DeleteRequestModal
         isOpen={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
-        request={selectedRequest}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setRequestToDelete(null);
+        }}
+        request={requestToDelete}
         onSuccess={handleDeleteSuccess}
       />
+
+      {/* ── Name Request Modal ───────────────────── */}
+      <NameRequestModal
+        isOpen={showNameModal}
+        onClose={() => setShowNameModal(false)}
+        onSubmit={handleNameRequestSubmit}
+      />
+
+      {/* ── Rename Request Modal ─────────────────── */}
+      <RenameRequestModal
+        isOpen={showRenameModal}
+        onClose={() => {
+          if (!renaming) {
+            setShowRenameModal(false);
+            setRequestToRename(null);
+          }
+        }}
+        onSubmit={handleRenameSubmit}
+        currentName={requestToRename?.name || ""}
+        loading={renaming}
+      />
+
+      {/* ── Toast Notification ───────────────────── */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
 
     </div>
   );

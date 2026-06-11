@@ -1,8 +1,18 @@
-import { useState } from "react";
-import { Search, Plus } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Search, Plus, MoreVertical, Edit2, Trash2 } from "lucide-react";
 
-const ApiSidebar = ({ requests = [], loading = false, selectedId, onSelect, onNewRequest }) => {
+const ApiSidebar = ({
+	requests = [],
+	loading = false,
+	selectedId,
+	onSelect,
+	onNewRequest,
+	onRename,
+	onDelete
+}) => {
 	const [search, setSearch] = useState("");
+	const [openMenuId, setOpenMenuId] = useState(null);
+	const menuRef = useRef(null);
 
 	// Filter flat request list by search
 	const filtered = requests.filter(
@@ -10,6 +20,34 @@ const ApiSidebar = ({ requests = [], loading = false, selectedId, onSelect, onNe
 			r.name.toLowerCase().includes(search.toLowerCase()) ||
 			r.method.toLowerCase().includes(search.toLowerCase())
 	);
+
+	// Close menu on outside click
+	useEffect(() => {
+		const handleClickOutside = (event) => {
+			if (menuRef.current && !menuRef.current.contains(event.target)) {
+				setOpenMenuId(null);
+			}
+		};
+		document.addEventListener("mousedown", handleClickOutside);
+		return () => document.removeEventListener("mousedown", handleClickOutside);
+	}, []);
+
+	const handleMenuToggle = (e, reqId) => {
+		e.stopPropagation();
+		setOpenMenuId(openMenuId === reqId ? null : reqId);
+	};
+
+	const handleRenameClick = (e, req) => {
+		e.stopPropagation();
+		setOpenMenuId(null);
+		onRename(req);
+	};
+
+	const handleDeleteClick = (e, req) => {
+		e.stopPropagation();
+		setOpenMenuId(null);
+		onDelete(req);
+	};
 
 	return (
 		<aside className="cd-sidebar">
@@ -55,6 +93,32 @@ const ApiSidebar = ({ requests = [], loading = false, selectedId, onSelect, onNe
 										{req.method}
 									</span>
 									<span className="cd-request-name">{req.name}</span>
+									<div className="cd-request-menu-wrapper">
+										<button
+											className="cd-request-menu-btn"
+											onClick={(e) => handleMenuToggle(e, req.id)}
+										>
+											<MoreVertical size={14} />
+										</button>
+										{openMenuId === req.id && (
+											<div ref={menuRef} className="cd-request-menu-dropdown">
+												<button
+													className="cd-menu-item"
+													onClick={(e) => handleRenameClick(e, req)}
+												>
+													<Edit2 size={14} />
+													Rename
+												</button>
+												<button
+													className="cd-menu-item cd-menu-item-danger"
+													onClick={(e) => handleDeleteClick(e, req)}
+												>
+													<Trash2 size={14} />
+													Delete
+												</button>
+											</div>
+										)}
+									</div>
 								</div>
 							))}
 						</div>

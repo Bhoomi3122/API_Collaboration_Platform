@@ -47,7 +47,6 @@ function Dashboard() {
       );
       setRequestCount(requestArrays.flat().length);
     } catch (err) {
-      console.error("Error loading dashboard data:", err);
       setWorkspaces([]);
       setSharedWorkspaces([]);
     } finally {
@@ -121,7 +120,7 @@ function Dashboard() {
                 <p style={{ color: "var(--text-secondary)", gridColumn: "1 / -1" }}>Loading workspaces...</p>
               ) : recentOwned.length > 0 ? (
                 recentOwned.map((workspace) => (
-                  <WorkspaceCard key={workspace.id} workspace={workspace} role="OWNER" />
+                  <WorkspaceCard key={workspace.id} workspace={workspace} role={workspace.role || "OWNER"} />
                 ))
               ) : (
                 <div className="empty-state">

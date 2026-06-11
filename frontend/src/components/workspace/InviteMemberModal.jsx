@@ -44,7 +44,6 @@ const InviteMemberModal = ({ isOpen, onClose, workspaceId, onInviteSuccess }) =>
         }
       }, 1500);
     } catch (err) {
-      console.error("Error inviting member:", err);
       const errorMessage = err.response?.data?.message || err.message || "Failed to send invitation";
       setError(errorMessage);
     } finally {

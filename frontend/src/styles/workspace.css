@@ -734,6 +734,26 @@
 .wp-activity-page-item .wp-activity-text { font-size: 13px; }
 .wp-activity-page-item .wp-activity-meta { font-size: 11px; }
 
+/* Activity empty states */
+.wp-activity-empty {
+  padding: 32px 16px;
+  text-align: center;
+  font-size: 12px;
+  color: #9CA3AF;
+}
+
+.wp-activity-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 56px 20px;
+  text-align: center;
+  gap: 8px;
+}
+.wp-activity-empty-title { font-size: 13px; font-weight: 600; color: #374151; margin: 0; }
+.wp-activity-empty-sub   { font-size: 12px; color: #9CA3AF; margin: 0; }
+
 /* Settings placeholder */
 .wp-settings-placeholder {
   display: flex;

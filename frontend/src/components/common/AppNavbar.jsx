@@ -141,7 +141,6 @@ const AppNavbar = ({ subtitle = "", activeItem = "" }) => {
                 {/* Menu items */}
                 {menuItem(User, "My Profile", () => navigate("/profile"))}
                 {menuItem(Mail, "Invitations", () => navigate("/invitations"))}
-                {menuItem(Settings, "Settings", () => console.log("Settings clicked"))}
 
                 <div className="app-navbar-dropdown-divider" />
 

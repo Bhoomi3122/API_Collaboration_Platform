@@ -44,7 +44,6 @@ const CreateWorkspaceModal = ({ isOpen, onClose, onSuccess }) => {
         if (onSuccess) onSuccess();
       }, 1000);
     } catch (err) {
-      console.error("Error creating workspace:", err);
       setApiError(
         err.response?.data?.message ||
           "Unable to create workspace. Please try again."

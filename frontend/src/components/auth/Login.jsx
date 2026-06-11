@@ -82,21 +82,16 @@ function Login() {
         password,
       });
 
-      console.log("Login successful:", response.data);
-
       // Store token and user info
       localStorage.setItem("token",     response.data.token);
       localStorage.setItem("userEmail", response.data.email || email);
       localStorage.setItem("userName",  response.data.name  || "");
       localStorage.setItem("userId",    response.data.userId || "");
 
-      console.log("Token stored successfully");
-
       // Redirect to dashboard
       navigate("/dashboard");
 
     } catch (err) {
-      console.error("Login failed:", err);
 
       setErrors((prev) => ({
         ...prev,

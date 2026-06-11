@@ -28,7 +28,6 @@ const InvitationsPage = () => {
       const data = await getMyInvitations();
       setInvitations(data);
     } catch (err) {
-      console.error("Error loading invitations:", err);
       setError(err.response?.data?.message || err.message || "Failed to load invitations");
     } finally {
       setLoading(false);
@@ -53,7 +52,6 @@ const InvitationsPage = () => {
       await acceptInvitation(id);
       setInvitations((prev) => prev.filter((inv) => inv.id !== id));
     } catch (err) {
-      console.error("Error accepting invitation:", err);
       alert(err.response?.data?.message || err.message || "Failed to accept invitation");
     } finally {
       setProcessing(null);
@@ -65,7 +63,6 @@ const InvitationsPage = () => {
       await rejectInvitation(id);
       setInvitations((prev) => prev.filter((inv) => inv.id !== id));
     } catch (err) {
-      console.error("Error rejecting invitation:", err);
       alert(err.response?.data?.message || err.message || "Failed to reject invitation");
     } finally {
       setProcessing(null);

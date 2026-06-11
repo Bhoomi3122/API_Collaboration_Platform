@@ -24,7 +24,6 @@ const DeleteRequestModal = ({ isOpen, onClose, request, onSuccess }) => {
         }
       }, 500);
     } catch (error) {
-      console.error("Error deleting request:", error);
       setApiError(
         error.response?.data?.message ||
           "Unable to delete request. Please try again."

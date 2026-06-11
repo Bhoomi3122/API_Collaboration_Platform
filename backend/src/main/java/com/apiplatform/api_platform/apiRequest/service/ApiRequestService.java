@@ -12,11 +12,16 @@ import com.apiplatform.api_platform.apiRequest.dto.response.ApiRequestResponse;
 import com.apiplatform.api_platform.apiRequest.entity.ApiRequest;
 import com.apiplatform.api_platform.apiRequest.exception.ApiRequestNotFoundException;
 import com.apiplatform.api_platform.apiRequest.repository.ApiRequestRepository;
+import com.apiplatform.api_platform.workspace.entity.Workspace;
+import com.apiplatform.api_platform.workspace.entity.WorkspaceMember;
+import com.apiplatform.api_platform.workspace.enums.WorkspaceRole;
+import com.apiplatform.api_platform.workspace.repository.WorkspaceMemberRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,15 +31,18 @@ public class ApiRequestService {
     private final CollectionRepository collectionRepository;
     private final UserRepository userRepository;
     private final ActivityService activityService;
+    private final WorkspaceMemberRepository workspaceMemberRepository;
 
     public ApiRequestService(ApiRequestRepository apiRequestRepository,
                              CollectionRepository collectionRepository,
                              UserRepository userRepository,
-                             ActivityService activityService) {
+                             ActivityService activityService,
+                             WorkspaceMemberRepository workspaceMemberRepository) {
         this.apiRequestRepository = apiRequestRepository;
         this.collectionRepository = collectionRepository;
         this.userRepository = userRepository;
         this.activityService = activityService;
+        this.workspaceMemberRepository = workspaceMemberRepository;
     }
 
     // ── Helper: Get currently authenticated user ──────────────────────────────────────────
@@ -47,6 +55,24 @@ public class ApiRequestService {
         return userRepository.findByEmail(email)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("User not found"));
+    }
+
+    // ── Helper: Check if user can edit workspace (OWNER or EDITOR role) ──────────────────
+
+    private boolean canEditWorkspace(Workspace workspace, User user) {
+        // Check if user is the workspace owner
+        if (workspace.getOwner().getId().equals(user.getId())) {
+            return true;
+        }
+
+        // Check if user has OWNER or EDITOR role in workspace members
+        Optional<WorkspaceMember> memberOpt = workspaceMemberRepository.findByWorkspaceAndUser(workspace, user);
+        if (memberOpt.isPresent()) {
+            WorkspaceRole role = memberOpt.get().getRole();
+            return role == WorkspaceRole.OWNER || role == WorkspaceRole.EDITOR;
+        }
+
+        return false;
     }
 
     // ── Helper: Verify collection ownership ──────────────────────────────────────────────
@@ -122,7 +148,7 @@ public class ApiRequestService {
         ApiRequest savedRequest = apiRequestRepository.save(apiRequest);
         activityService.createActivity(
                 ActivityType.ENDPOINT_CREATED,
-                "Endpoint '" + savedRequest.getName() + "' created",
+                "Endpoint created in \"" + collection.getName() + "\" collection",
                 collection.getWorkspace(),
                 collection,
                 getCurrentUser()
@@ -204,12 +230,47 @@ public class ApiRequestService {
         ApiRequest updatedRequest = apiRequestRepository.save(existing);
         activityService.createActivity(
                 ActivityType.ENDPOINT_UPDATED,
-                "Endpoint '" + updatedRequest.getName() + "' updated",
+                "Endpoint '" + updatedRequest.getName() + "' updated in '" + updatedRequest.getCollection().getName() + "' collection",
                 updatedRequest.getCollection().getWorkspace(),
                 updatedRequest.getCollection(),
                 getCurrentUser()
         );
         return convertToResponse(updatedRequest);
+    }
+
+    // ── Rename a request ────────────────────────────────────────────────────────
+
+    @Transactional
+    public ApiRequestResponse renameRequest(Long id, String newName) {
+        ApiRequest apiRequest = apiRequestRepository.findById(id)
+                .orElseThrow(() -> new ApiRequestNotFoundException(
+                        "API request not found with id: " + id));
+
+        // Verify user has OWNER or EDITOR role in the workspace
+        User currentUser = getCurrentUser();
+        Workspace workspace = apiRequest.getCollection().getWorkspace();
+        
+        if (!canEditWorkspace(workspace, currentUser)) {
+            throw new ApiRequestNotFoundException(
+                    "API request not found with id: " + id);
+        }
+
+        String oldName = apiRequest.getName();
+        apiRequest.setName(newName);
+        ApiRequest updated = apiRequestRepository.save(apiRequest);
+
+        // Create activity only if name actually changed
+        if (!oldName.equals(newName)) {
+            activityService.createActivity(
+                    ActivityType.ENDPOINT_RENAMED,
+                    "Endpoint renamed in \"" + updated.getCollection().getName() + "\" collection",
+                    updated.getCollection().getWorkspace(),
+                    updated.getCollection(),
+                    currentUser
+            );
+        }
+
+        return convertToResponse(updated);
     }
 
     // ── Delete a request ────────────────────────────────────────────────────────
@@ -220,23 +281,25 @@ public class ApiRequestService {
                 .orElseThrow(() -> new ApiRequestNotFoundException(
                         "API request not found with id: " + id));
 
-        // Verify ownership before deleting
+        // Verify user has OWNER or EDITOR role in the workspace
         User currentUser = getCurrentUser();
-        if (!apiRequest.getCollection().getWorkspace()
-                .getOwner()
-                .getId()
-                .equals(currentUser.getId())) {
+        Workspace workspace = apiRequest.getCollection().getWorkspace();
+
+        if (!canEditWorkspace(workspace, currentUser)) {
             throw new ApiRequestNotFoundException(
                     "API request not found with id: " + id);
         }
-        apiRequestRepository.delete(apiRequest);
 
+        String endpointName = apiRequest.getName();
+        String collectionName = apiRequest.getCollection().getName();
+
+        apiRequestRepository.delete(apiRequest);
 
         activityService.createActivity(
                 ActivityType.ENDPOINT_DELETED,
-                "Endpoint '" + apiRequest.getName() + "' deleted",
-                apiRequest.getCollection().getWorkspace(),
-                apiRequest.getCollection(),
+                "Endpoint deleted from \"" + collectionName + "\" collection",
+                workspace,
+                null,
                 getCurrentUser()
         );
     }

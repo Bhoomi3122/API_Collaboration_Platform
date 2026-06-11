@@ -10,7 +10,6 @@ export const getRequestsByCollection = async (collectionId) => {
     const response = await apiClient.get(`/requests/collection/${collectionId}`);
     return response.data;
   } catch (error) {
-    console.error("Error fetching requests by collection:", error);
     throw error;
   }
 };
@@ -21,7 +20,6 @@ export const getRequestById = async (id) => {
     const response = await apiClient.get(`/requests/${id}`);
     return response.data;
   } catch (error) {
-    console.error("Error fetching request by id:", error);
     throw error;
   }
 };
@@ -32,7 +30,6 @@ export const createRequest = async (requestData) => {
     const response = await apiClient.post("/requests", requestData);
     return response.data;
   } catch (error) {
-    console.error("Error creating request:", error);
     throw error;
   }
 };
@@ -43,7 +40,16 @@ export const updateRequest = async (id, requestData) => {
     const response = await apiClient.put(`/requests/${id}`, requestData);
     return response.data;
   } catch (error) {
-    console.error("Error updating request:", error);
+    throw error;
+  }
+};
+
+// Rename an existing API request
+export const renameRequest = async (id, name) => {
+  try {
+    const response = await apiClient.patch(`/requests/${id}/rename`, { name });
+    return response.data;
+  } catch (error) {
     throw error;
   }
 };
@@ -54,7 +60,6 @@ export const deleteRequest = async (id) => {
     const response = await apiClient.delete(`/requests/${id}`);
     return response.data;
   } catch (error) {
-    console.error("Error deleting request:", error);
     throw error;
   }
 };
@@ -65,7 +70,6 @@ export const executeRequest = async (id) => {
     const response = await apiClient.post(`/requests/${id}/execute`);
     return response.data;
   } catch (error) {
-    console.error("Error executing request:", error);
     throw error;
   }
 };
@@ -81,7 +85,6 @@ export const executeDirectRequest = async (payload) => {
     const response = await apiClient.post("/requests/execute", payload);
     return response.data;
   } catch (error) {
-    console.error("Error executing request via backend:", error);
     throw error;
   }
 };

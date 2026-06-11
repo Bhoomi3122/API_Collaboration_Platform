@@ -46,6 +46,7 @@ public class WorkspaceService {
         workspaceResponse.setName(workspace.getName());
         workspaceResponse.setDescription(workspace.getDescription());
         workspaceResponse.setCreatedAt(workspace.getCreatedAt());
+        workspaceResponse.setOwnerEmail(workspace.getOwner().getEmail());
         return workspaceResponse;
     }
 
@@ -60,7 +61,9 @@ public class WorkspaceService {
         workspace.setDescription(request.getDescription());
         workspace.setOwner(user);
         Workspace savedWorkspace = workspaceRepository.save(workspace);
-        return convertWorkspaceToResponse(savedWorkspace);
+        WorkspaceResponse response = convertWorkspaceToResponse(savedWorkspace);
+        response.setRole("OWNER");
+        return response;
     }
 
     public List<WorkspaceResponse> getUserWorkspaces()
@@ -104,8 +107,25 @@ public class WorkspaceService {
                 .getAuthentication()
                 .getName();
         User user = userRepository.findByEmail(email).orElseThrow(()->new RuntimeException("User not found"));
-        Workspace workspace = workspaceRepository.findByIdAndOwner(id,user).orElseThrow(()->new WorkspaceNotFoundException("Workspace not found"));
-        return convertWorkspaceToResponse(workspace);
+
+        // Try to find workspace by ID first
+        Workspace workspace = workspaceRepository.findById(id)
+                .orElseThrow(() -> new WorkspaceNotFoundException("Workspace not found"));
+
+        // Check if user is the owner
+        if (workspace.getOwner().getId().equals(user.getId())) {
+            WorkspaceResponse response = convertWorkspaceToResponse(workspace);
+            response.setRole("OWNER");
+            return response;
+        }
+
+        // Check if user is a member
+        WorkspaceMember membership = workspaceMemberRepository.findByWorkspaceAndUser(workspace, user)
+                .orElseThrow(() -> new WorkspaceNotFoundException("Workspace not found"));
+
+        WorkspaceResponse response = convertWorkspaceToResponse(workspace);
+        response.setRole(membership.getRole().name());
+        return response;
     }
 
     public WorkspaceResponse updateWorkspace(Long id, CreateWorkspaceRequest request)
@@ -119,7 +139,9 @@ public class WorkspaceService {
         if (request.getDescription() != null) {
             workspace.setDescription(request.getDescription());
         }
-        return convertWorkspaceToResponse(workspaceRepository.save(workspace));
+        WorkspaceResponse response = convertWorkspaceToResponse(workspaceRepository.save(workspace));
+        response.setRole("OWNER");
+        return response;
     }
 
     @Transactional

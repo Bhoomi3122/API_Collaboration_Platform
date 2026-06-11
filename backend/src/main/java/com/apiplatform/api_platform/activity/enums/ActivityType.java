@@ -11,5 +11,6 @@ public enum ActivityType {
 
     ENDPOINT_CREATED,
     ENDPOINT_UPDATED,
+    ENDPOINT_RENAMED,
     ENDPOINT_DELETED
 }

@@ -82,7 +82,6 @@ const EditCollection = ({ isOpen, onClose, collection, onSuccess }) => {
         }
       }, 500);
     } catch (error) {
-      console.error("Error updating collection:", error);
       setApiError(
         error.response?.data?.message ||
           "Unable to update collection. Please try again."

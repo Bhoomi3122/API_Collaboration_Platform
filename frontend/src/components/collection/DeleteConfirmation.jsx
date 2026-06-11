@@ -24,7 +24,6 @@ const DeleteConfirmation = ({ isOpen, onClose, collection, onSuccess }) => {
         }
       }, 500);
     } catch (error) {
-      console.error("Error deleting collection:", error);
       setApiError(
         error.response?.data?.message ||
           "Unable to delete collection. Please try again."

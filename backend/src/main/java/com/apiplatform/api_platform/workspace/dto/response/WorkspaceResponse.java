@@ -17,4 +17,5 @@ public class WorkspaceResponse {
     private String description;
     private LocalDateTime createdAt;
     private String role; // OWNER, EDITOR, VIEWER
+    private String ownerEmail; // Email of the workspace owner
 }

@@ -44,7 +44,6 @@ function ProfilePage() {
       const data = await getUserStats();
       setStats(data);
     } catch (error) {
-      console.error("Failed to load stats:", error);
       // Keep stats at 0 on error
       setStats({
         workspacesOwned: 0,
@@ -76,7 +75,7 @@ function ProfilePage() {
         localStorage.setItem("userName", tempName);
         setEditingName(false);
       } catch (error) {
-        console.error("Failed to update name:", error);
+        // Handle error silently
       }
     }
   };

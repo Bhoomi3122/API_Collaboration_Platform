@@ -11,5 +11,7 @@ import java.util.List;
 public interface ApiRequestRepository extends JpaRepository<ApiRequest, Long> {
 
     List<ApiRequest> findByCollection(Collection collection);
+
+    int countByCollection(Collection collection);
 }
 

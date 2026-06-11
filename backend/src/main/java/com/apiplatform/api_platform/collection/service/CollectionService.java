@@ -25,17 +25,20 @@ public class CollectionService {
     private final WorkspaceRepository workspaceRepository;
     private final UserRepository userRepository;
     private final ActivityService activityService;
+    private final com.apiplatform.api_platform.apiRequest.repository.ApiRequestRepository apiRequestRepository;
 
     public CollectionService(
             CollectionRepository collectionRepository,
             WorkspaceRepository workspaceRepository,
             UserRepository userRepository,
-            ActivityService activityService
+            ActivityService activityService,
+            com.apiplatform.api_platform.apiRequest.repository.ApiRequestRepository apiRequestRepository
     ) {
         this.collectionRepository = collectionRepository;
         this.workspaceRepository = workspaceRepository;
         this.userRepository = userRepository;
         this.activityService = activityService;
+        this.apiRequestRepository = apiRequestRepository;
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -92,6 +95,7 @@ public class CollectionService {
         response.setDescription(collection.getDescription());
         response.setWorkspaceId(collection.getWorkspace().getId());
         response.setCreatedAt(collection.getCreatedAt());
+        response.setEndpointCount(apiRequestRepository.countByCollection(collection));
 
         return response;
     }
@@ -145,7 +149,6 @@ public class CollectionService {
     public List<CollectionResponse> getCollectionsByWorkspace(
             Long workspaceId
     ) {
-        System.out.println("Reached getCollectionsByWorkspace");
         User currentUser = getCurrentUser();
 
         Workspace workspace = workspaceRepository
@@ -213,15 +216,18 @@ public class CollectionService {
     public void deleteCollection(Long id) {
 
         Collection collection = getOwnedCollection(id);
+        String collectionName = collection.getName();
+        Workspace workspace = collection.getWorkspace();
+        User currentUser = getCurrentUser();
 
         collectionRepository.delete(collection);
 
         activityService.createActivity(
                 ActivityType.COLLECTION_DELETED,
-                "Collection '" + collection.getName() + "' deleted",
-                collection.getWorkspace(),
-                collection,
-                getCurrentUser()
+                "Collection '" + collectionName + "' deleted",
+                workspace,
+                null,
+                currentUser
         );
     }
 }

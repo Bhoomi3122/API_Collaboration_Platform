@@ -74,7 +74,6 @@ const CreateCollection = ({ isOpen, onClose, workspaceId, onSuccess }) => {
         }
       }, 1000);
     } catch (error) {
-      console.error("Error creating collection:", error);
       setApiError(
         error.response?.data?.message ||
           "Unable to create collection. Please try again."

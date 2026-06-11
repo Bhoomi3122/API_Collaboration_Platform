@@ -280,7 +280,8 @@
 }
 
 .btn-cancel,
-.btn-create {
+.btn-create,
+.btn-primary {
   height: 38px;
   padding: 0 20px;
   border-radius: 8px;
@@ -311,18 +312,21 @@
   cursor: not-allowed;
 }
 
-.btn-create {
+.btn-create,
+.btn-primary {
   background: #2F81F7;
   color: #FFFFFF;
   border: 1px solid #2F81F7;
 }
 
-.btn-create:hover:not(:disabled) {
+.btn-create:hover:not(:disabled),
+.btn-primary:hover:not(:disabled) {
   background: #1F6FEB;
   border-color: #1F6FEB;
 }
 
-.btn-create:disabled {
+.btn-create:disabled,
+.btn-primary:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }

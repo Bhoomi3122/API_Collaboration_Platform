@@ -2,6 +2,7 @@ package com.apiplatform.api_platform.apiRequest.controller;
 
 import com.apiplatform.api_platform.apiRequest.dto.request.AdHocExecuteRequest;
 import com.apiplatform.api_platform.apiRequest.dto.request.CreateApiRequestRequest;
+import com.apiplatform.api_platform.apiRequest.dto.request.RenameApiRequestRequest;
 import com.apiplatform.api_platform.apiRequest.dto.response.ApiExecutionResponse;
 import com.apiplatform.api_platform.apiRequest.dto.response.ApiRequestResponse;
 import com.apiplatform.api_platform.apiRequest.service.ApiRequestService;
@@ -56,6 +57,15 @@ public class ApiRequestController {
             @PathVariable Long id,
             @Valid @RequestBody CreateApiRequestRequest request) {
         return ResponseEntity.ok(apiRequestService.updateRequest(id, request));
+    }
+
+    // ── PATCH /api/requests/{id}/rename ─────────────────────────────────────────
+
+    @PatchMapping("/{id}/rename")
+    public ResponseEntity<ApiRequestResponse> renameRequest(
+            @PathVariable Long id,
+            @Valid @RequestBody RenameApiRequestRequest request) {
+        return ResponseEntity.ok(apiRequestService.renameRequest(id, request.getName()));
     }
 
     // ── DELETE /api/requests/{id} ───────────────────────────────────────────────

@@ -18,5 +18,6 @@ public class CollectionResponse {
     private String description;
     private Long workspaceId;
     private LocalDateTime createdAt;
+    private Integer endpointCount;
 }
 

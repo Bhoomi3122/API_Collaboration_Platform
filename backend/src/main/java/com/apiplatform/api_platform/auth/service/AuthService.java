@@ -71,7 +71,6 @@ public class AuthService {
         }
 
         String token = jwtUtil.generateToken(user.getEmail());
-        System.out.println(jwtUtil.extractEmail(token));
 
         return convertUserToAuthResponse(user, token);
     }

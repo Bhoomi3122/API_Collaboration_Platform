@@ -40,7 +40,11 @@ public class ActivityService {
         List<ActivityResponse> responses = new ArrayList<>();
 
         for (Activity activity : activities) {
-            responses.add(convertActivityToResponse(activity));
+            // Filter out ENDPOINT_UPDATED from workspace feed
+            // Only show ENDPOINT_CREATED, ENDPOINT_DELETED, and ENDPOINT_RENAMED
+            if (activity.getType() != ActivityType.ENDPOINT_UPDATED) {
+                responses.add(convertActivityToResponse(activity));
+            }
         }
 
         return responses;
@@ -83,7 +87,10 @@ public class ActivityService {
         activity.setType(type);
         activity.setMessage(message);
         activity.setWorkspace(workspace);
-        activity.setCollection(collection);
+        // Only set collection if it has a valid ID and is not being removed
+        if (collection != null && collection.getId() != null) {
+            activity.setCollection(collection);
+        }
         activity.setActor(actor);
 
         return activityRepository.save(activity);

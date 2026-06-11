@@ -16,27 +16,21 @@ import EditCollection from "../collection/EditCollection";
 import DeleteConfirmation from "../collection/DeleteConfirmation";
 import { getWorkspaceById, getCollectionsByWorkspace } from "../../services/workspaceApi";
 import { getWorkspaceMembers, getPendingWorkspaceInvitations, cancelInvitation } from "../../services/collaborationApi";
+import { getWorkspaceActivities } from "../../services/activityApi";
 import "../../styles/workspace.css";
 
 // Activity icon map - consistent, never random
 const ACTIVITY_ICON = {
-  endpoint_created:    PlusCircle,
-  endpoint_updated:    Pencil,
-  endpoint_deleted:    Trash2,
-  collection_created:  FolderPlus,
-  collection_updated:  FolderPlus,
-  member_joined:       UserPlus,
-  invitation_sent:     Mail,
-  invitation_accepted: CheckCircle,
+  ENDPOINT_CREATED:    PlusCircle,
+  ENDPOINT_RENAMED:    Pencil,
+  ENDPOINT_DELETED:    Trash2,
+  COLLECTION_CREATED:  FolderPlus,
+  COLLECTION_UPDATED:  FolderPlus,
+  COLLECTION_DELETED:  Trash2,
+  MEMBER_JOINED:       UserPlus,
+  MEMBER_INVITED:      Mail,
+  MEMBER_LEFT:         UserPlus,
 };
-
-const ACTIVITY = [
-  { id: 1, type: "endpoint_created", text: "GET /users endpoint created", actor: "You", time: "2 min ago" },
-  { id: 2, type: "collection_created", text: "User Management collection created", actor: "You", time: "1 hour ago" },
-  { id: 3, type: "member_joined", text: "Rishita Gupta joined the workspace", actor: "Rishita", time: "3 hours ago" },
-  { id: 4, type: "endpoint_updated", text: "POST /login endpoint updated", actor: "You", time: "Yesterday" },
-  { id: 5, type: "collection_updated", text: "Auth collection description updated", actor: "You", time: "2 days ago" },
-];
 
 // Neutral avatar stack - no random colors
 const AvatarStack = ({ members = [] }) => {
@@ -271,6 +265,7 @@ const WorkspacePage = () => {
   const [workspace,    setWorkspace]    = useState(null);
   const [collections,  setCollections]  = useState([]);
   const [members,      setMembers]      = useState([]);
+  const [activities,   setActivities]   = useState([]);
   const [loading,      setLoading]      = useState(true);
   const [error,        setError]        = useState(null);
   const [activeTab,    setActiveTab]    = useState("collections");
@@ -312,6 +307,14 @@ const WorkspacePage = () => {
         setPendingCount((pending || []).filter((i) => i.status === "PENDING").length);
       } catch (_e) {
         // 403 for non-owners is expected
+      }
+      try {
+        const acts = await getWorkspaceActivities(workspaceId);
+        // Filter out ENDPOINT_UPDATED - only show created, deleted, and renamed endpoint activities
+        const filteredActivities = (acts || []).filter(act => act.type !== 'ENDPOINT_UPDATED');
+        setActivities(filteredActivities);
+      } catch (_e) {
+        // activities might fail, non-critical
       }
     } catch (err) {
       setError(err.response?.data?.message || err.message || "Failed to load workspace");
@@ -499,32 +502,38 @@ const WorkspacePage = () => {
                     </button>
                   </div>
                   <div className="wp-activity-feed">
-                    {ACTIVITY.map((item, idx) => {
-                      const Icon = ACTIVITY_ICON[item.type] || PlusCircle;
-                      return (
-                        <div key={item.id} className="wp-activity-item">
-                          <div className="wp-activity-icon-wrap">
-                            <Icon size={14} />
+                    {activities.length === 0 ? (
+                      <p className="wp-activity-empty">No recent activity</p>
+                    ) : (
+                      activities.slice(0, 5).map((item, idx) => {
+                        const Icon = ACTIVITY_ICON[item.type] || PlusCircle;
+                        return (
+                          <div key={item.id} className="wp-activity-item">
+                            <div className="wp-activity-icon-wrap">
+                              <Icon size={14} />
+                            </div>
+                            {idx < Math.min(activities.length, 5) - 1 && (
+                              <div className="wp-activity-line" />
+                            )}
+                            <div className="wp-activity-body">
+                              <p className="wp-activity-text">{item.message}</p>
+                              <p className="wp-activity-meta">
+                                <span>{item.actorName}</span> &middot; {relativeTime(item.createdAt)}
+                              </p>
+                            </div>
                           </div>
-                          {idx < ACTIVITY.length - 1 && (
-                            <div className="wp-activity-line" />
-                          )}
-                          <div className="wp-activity-body">
-                            <p className="wp-activity-text">{item.text}</p>
-                            <p className="wp-activity-meta">
-                              <span>{item.actor}</span> &middot; {item.time}
-                            </p>
-                          </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })
+                    )}
                   </div>
-                  <button
-                    className="wp-activity-bottom-link"
-                    onClick={() => setActiveTab("activity")}
-                  >
-                    View all activity
-                  </button>
+                  {activities.length > 0 && (
+                    <button
+                      className="wp-activity-bottom-link"
+                      onClick={() => setActiveTab("activity")}
+                    >
+                      View all activity
+                    </button>
+                  )}
                 </div>
               </>
             )}
@@ -549,22 +558,32 @@ const WorkspacePage = () => {
                   </div>
                 </div>
                 <div className="wp-activity-page-feed">
-                  {ACTIVITY.map((item) => {
-                    const Icon = ACTIVITY_ICON[item.type] || PlusCircle;
-                    return (
-                      <div key={item.id} className="wp-activity-page-item">
-                        <div className="wp-activity-page-icon">
-                          <Icon size={14} />
+                  {activities.length === 0 ? (
+                    <div className="wp-activity-empty-state">
+                      <Activity size={32} color="#D1D5DB" />
+                      <p className="wp-activity-empty-title">No activity yet</p>
+                      <p className="wp-activity-empty-sub">
+                        Activity will appear here as you and your team work in this workspace.
+                      </p>
+                    </div>
+                  ) : (
+                    activities.map((item) => {
+                      const Icon = ACTIVITY_ICON[item.type] || PlusCircle;
+                      return (
+                        <div key={item.id} className="wp-activity-page-item">
+                          <div className="wp-activity-page-icon">
+                            <Icon size={14} />
+                          </div>
+                          <div className="wp-activity-body">
+                            <p className="wp-activity-text">{item.message}</p>
+                            <p className="wp-activity-meta">
+                              <span>{item.actorName}</span> &middot; {relativeTime(item.createdAt)}
+                            </p>
+                          </div>
                         </div>
-                        <div className="wp-activity-body">
-                          <p className="wp-activity-text">{item.text}</p>
-                          <p className="wp-activity-meta">
-                            <span>{item.actor}</span> &middot; {item.time}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })
+                  )}
                 </div>
               </div>
             )}
