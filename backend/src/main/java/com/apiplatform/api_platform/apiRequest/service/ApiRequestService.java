@@ -126,8 +126,22 @@ public class ApiRequestService {
 
     @Transactional
     public ApiRequestResponse createRequest(CreateApiRequestRequest request) {
-        // Verify ownership before creating
-        Collection collection = getOwnedCollection(request.getCollectionId());
+        // Get the collection and check if user has edit permissions
+        Collection collection = collectionRepository.findById(request.getCollectionId())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Collection not found with id: " + request.getCollectionId()
+                        ));
+
+        User currentUser = getCurrentUser();
+        Workspace workspace = collection.getWorkspace();
+
+        // Check if user can edit (OWNER or EDITOR)
+        if (!canEditWorkspace(workspace, currentUser)) {
+            throw new ResourceNotFoundException(
+                    "Collection not found with id: " + request.getCollectionId()
+            );
+        }
 
         ApiRequest apiRequest = new ApiRequest();
         apiRequest.setName(request.getName());
@@ -176,12 +190,14 @@ public class ApiRequestService {
                 .orElseThrow(() -> new ApiRequestNotFoundException(
                         "API request not found with id: " + id));
 
-        // Verify ownership
+        // Verify access (owner or member)
         User currentUser = getCurrentUser();
-        if (!apiRequest.getCollection().getWorkspace()
-                .getOwner()
-                .getId()
-                .equals(currentUser.getId())) {
+        Workspace workspace = apiRequest.getCollection().getWorkspace();
+
+        boolean isOwner = workspace.getOwner().getId().equals(currentUser.getId());
+        boolean isMember = workspaceMemberRepository.findByWorkspaceAndUser(workspace, currentUser).isPresent();
+
+        if (!isOwner && !isMember) {
             throw new ApiRequestNotFoundException(
                     "API request not found with id: " + id);
         }
@@ -207,10 +223,21 @@ public class ApiRequestService {
                     "API request not found with id: " + id);
         }
 
-        // Validate new collection if collectionId has changed (and verify ownership)
+        // Validate new collection if collectionId has changed (and verify access)
         if (!existing.getCollection().getId().equals(request.getCollectionId())) {
-            Collection collection = getOwnedCollection(request.getCollectionId());
-            existing.setCollection(collection);
+            Collection newCollection = collectionRepository.findById(request.getCollectionId())
+                    .orElseThrow(() ->
+                            new ResourceNotFoundException(
+                                    "Collection not found with id: " + request.getCollectionId()
+                            ));
+
+            Workspace newWorkspace = newCollection.getWorkspace();
+            if (!canEditWorkspace(newWorkspace, currentUser)) {
+                throw new ResourceNotFoundException(
+                        "Collection not found with id: " + request.getCollectionId()
+                );
+            }
+            existing.setCollection(newCollection);
         }
 
         existing.setName(request.getName());

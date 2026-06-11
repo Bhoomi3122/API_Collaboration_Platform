@@ -159,7 +159,7 @@ const InvitationsPage = () => {
             ) : (
               <div className="invitations-list">
                 {filteredInvitations.map((inv) => {
-                  const roleStyle = ROLE_STYLES.VIEWER;
+                  const roleStyle = ROLE_STYLES[inv.role] || ROLE_STYLES.VIEWER;
                   const busy = processing === inv.id;
                   const isExpired = inv.status === "EXPIRED";
                   const isPending = inv.status === "PENDING";
@@ -174,7 +174,7 @@ const InvitationsPage = () => {
                         </p>
                       </div>
                       <span className="invitation-role-badge" style={{ background: roleStyle.bg, color: roleStyle.color }}>
-                        Viewer
+                        {inv.role ? inv.role.charAt(0) + inv.role.slice(1).toLowerCase() : "Viewer"}
                       </span>
                       {isExpired && (
                         <span className="invitation-status-badge invitation-status-badge--expired">Expired</span>
