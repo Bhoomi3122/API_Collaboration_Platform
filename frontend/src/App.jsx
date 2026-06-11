@@ -1,4 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import LandingPage from "./components/landing/LandingPage";
+import LearnMorePage from "./components/landing/LearnMorePage";
 import Signup from "./components/auth/Signup";
 import Login from "./components/auth/Login";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
@@ -14,19 +16,20 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Root path - redirect based on authentication */}
+        {/* Root path - Landing page for logged out users, Dashboard for logged in users */}
         <Route
           path="/"
           element={
             isAuthenticated() ? (
               <Navigate to="/dashboard" replace />
             ) : (
-              <Navigate to="/login" replace />
+              <LandingPage />
             )
           }
         />
 
         {/* Public routes */}
+        <Route path="/learn-more" element={<LearnMorePage />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
 
