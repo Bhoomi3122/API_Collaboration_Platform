@@ -31,22 +31,4 @@ build/
 
 ### VS Code ###
 .vscode/
-
-### Sensitive Configuration Files ###
-**/application.properties
-**/application-prod.properties
-**/.env
-
-### Logs ###
-*.log
-logs/
-
-### OS ###
-.DS_Store
-Thumbs.db
-
-### Temporary Files ###
-*.tmp
-*.bak
-*.swp
-*~
+.env
