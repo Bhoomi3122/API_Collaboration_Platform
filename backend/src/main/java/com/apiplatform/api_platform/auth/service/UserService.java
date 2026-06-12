@@ -1,7 +1,8 @@
 package com.apiplatform.api_platform.auth.service;
 
-import com.apiplatform.api_platform.apiRequest.entity.ApiRequest;
+import com.apiplatform.api_platform.activity.repository.ActivityRepository;
 import com.apiplatform.api_platform.apiRequest.repository.ApiRequestRepository;
+import com.apiplatform.api_platform.auth.dto.response.UserProfileResponse;
 import com.apiplatform.api_platform.auth.dto.response.UserStatsResponse;
 import com.apiplatform.api_platform.auth.entity.User;
 import com.apiplatform.api_platform.auth.exception.UserNotFoundException;
@@ -29,6 +30,7 @@ public class UserService {
     private final CollectionRepository collectionRepository;
     private final ApiRequestRepository apiRequestRepository;
     private final WorkspaceInvitationRepository workspaceInvitationRepository;
+    private final ActivityRepository activityRepository;
     private final PasswordEncoder passwordEncoder;
 
     public UserService(UserRepository userRepository,
@@ -37,6 +39,7 @@ public class UserService {
                       CollectionRepository collectionRepository,
                       ApiRequestRepository apiRequestRepository,
                       WorkspaceInvitationRepository workspaceInvitationRepository,
+                      ActivityRepository activityRepository,
                       PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.workspaceRepository = workspaceRepository;
@@ -44,6 +47,7 @@ public class UserService {
         this.collectionRepository = collectionRepository;
         this.apiRequestRepository = apiRequestRepository;
         this.workspaceInvitationRepository = workspaceInvitationRepository;
+        this.activityRepository = activityRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -110,8 +114,7 @@ public class UserService {
         );
     }
 
-    @Transactional
-    public void deleteAccount(String password) {
+    public UserProfileResponse getUserProfile() {
         String email = SecurityContextHolder.getContext()
                 .getAuthentication()
                 .getName();
@@ -119,46 +122,80 @@ public class UserService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
-        // Verify password
+        return UserProfileResponse.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .email(user.getEmail())
+                .createdAt(user.getCreatedAt())
+                .build();
+    }
+
+    @Transactional
+    public void deleteAccount(String password) {
+        System.out.println("=== DELETE ACCOUNT START ===");
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+        System.out.println("User found: " + user.getName());
+
         if (!passwordEncoder.matches(password, user.getPassword())) {
+            System.out.println("Password verification FAILED");
             throw new IllegalArgumentException("Invalid password");
         }
+        System.out.println("Password verification SUCCESS");
 
-        // Get all owned workspaces
+        // Step 1: Delete ALL activities where this user is the actor
+        // (actor_id FK → users table — must be cleared before deleting user)
+        activityRepository.deleteAll(activityRepository.findByActor(user));
+
+        // Step 2: Delete ALL invitations where user is the invited person
+        workspaceInvitationRepository.deleteAll(
+                workspaceInvitationRepository.findByInvitedUser(user)
+        );
+
+        // Step 3: Delete ALL invitations where user sent the invite
+        workspaceInvitationRepository.deleteAll(
+                workspaceInvitationRepository.findByInvitedBy(user)
+        );
+
+        // Step 4: Remove user from shared workspaces
+        List<WorkspaceMember> memberships = workspaceMemberRepository.findByUser(user);
+        workspaceMemberRepository.deleteAll(memberships);
+
+        // Step 5: Delete all owned workspaces and their contents
         List<Workspace> ownedWorkspaces = workspaceRepository.findByOwner(user);
-
-        // Delete all owned workspaces and their contents
         for (Workspace workspace : ownedWorkspaces) {
-            // Delete all API requests in all collections
             List<Collection> collections = collectionRepository.findByWorkspace(workspace);
+
             for (Collection collection : collections) {
+                // Delete activities for this collection
+                activityRepository.deleteAll(activityRepository.findByCollection(collection));
+                // Delete all API requests in this collection
                 apiRequestRepository.deleteAll(apiRequestRepository.findByCollection(collection));
             }
 
             // Delete all collections
             collectionRepository.deleteAll(collections);
 
-            // Delete workspace members
+            // Delete activities for this workspace
+            activityRepository.deleteAll(activityRepository.findByWorkspace(workspace));
+
+            // Delete all workspace members
             workspaceMemberRepository.deleteAll(workspaceMemberRepository.findByWorkspace(workspace));
 
-            // Delete workspace invitations
+            // Delete ALL workspace invitations (any status)
             workspaceInvitationRepository.deleteAll(
-                    workspaceInvitationRepository.findByWorkspaceAndStatus(workspace, InvitationStatus.PENDING)
+                    workspaceInvitationRepository.findByWorkspace(workspace)
             );
 
             // Delete the workspace
             workspaceRepository.delete(workspace);
         }
 
-        // Remove user from shared workspaces
-        List<WorkspaceMember> memberships = workspaceMemberRepository.findByUser(user);
-        workspaceMemberRepository.deleteAll(memberships);
-
-        // Delete all invitations where user is invited
-        workspaceInvitationRepository.deleteAll(workspaceInvitationRepository.findByInvitedUser(user));
-
-        // Finally, delete the user
+        // Step 6: Finally delete the user
         userRepository.delete(user);
+        System.out.println("=== DELETE ACCOUNT SUCCESS ===");
     }
 }
 

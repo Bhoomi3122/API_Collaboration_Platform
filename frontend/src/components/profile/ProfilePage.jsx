@@ -4,7 +4,7 @@ import AppNavbar from "../common/AppNavbar";
 import GlobalNavDrawer from "../common/GlobalNavDrawer";
 import ChangePasswordModal from "./ChangePasswordModal";
 import DeleteAccountModal from "./DeleteAccountModal";
-import { getUserStats } from "../../services/userApi";
+import { getUserStats, getUserProfile } from "../../services/userApi";
 import "../../styles/profile.css";
 
 function ProfilePage() {
@@ -36,8 +36,41 @@ function ProfilePage() {
 
   // Load user stats
   useEffect(() => {
+    loadUserProfile();
     loadUserStats();
   }, []);
+
+  const loadUserProfile = async () => {
+    try {
+      const profile = await getUserProfile();
+      const memberSince = formatMemberSince(profile.createdAt);
+
+      setUserData({
+        name: profile.name,
+        email: profile.email,
+        userId: profile.id.toString(),
+        memberSince: memberSince,
+      });
+
+      // Update localStorage
+      localStorage.setItem("userName", profile.name);
+      localStorage.setItem("userEmail", profile.email);
+      localStorage.setItem("userId", profile.id.toString());
+
+      // Update temp name for editing
+      setTempName(profile.name);
+    } catch (error) {
+      console.error("Failed to load profile:", error);
+      setUserData(prev => ({ ...prev, memberSince: "N/A" }));
+    }
+  };
+
+  const formatMemberSince = (createdAt) => {
+    const date = new Date(createdAt);
+    const month = date.toLocaleString('en-US', { month: 'long' });
+    const year = date.getFullYear();
+    return `${month} ${year}`;
+  };
 
   const loadUserStats = async () => {
     try {

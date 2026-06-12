@@ -33,7 +33,39 @@ function DeleteAccountModal({ onClose }) {
       // Redirect to signup page
       navigate("/signup");
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to delete account. Please check your password.");
+      console.error("Delete account error:", err);
+      console.error("Error response:", err.response);
+      console.error("Error data:", err.response?.data);
+      console.error("Status:", err.response?.status);
+
+      // Extract error message from various possible formats
+      let errorMessage = "Failed to delete account. Please check your password.";
+
+      if (err.response?.data) {
+        if (typeof err.response.data === 'string') {
+          errorMessage = err.response.data;
+        } else if (err.response.data.message) {
+          errorMessage = err.response.data.message;
+        } else if (err.response.data.error) {
+          errorMessage = err.response.data.error;
+        } else {
+          // Convert object to readable string
+          errorMessage = JSON.stringify(err.response.data);
+        }
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+
+      // Handle specific status codes
+      if (err.response?.status === 403) {
+        errorMessage = "Access denied. Please log out and log back in, then try again.";
+      } else if (err.response?.status === 401) {
+        errorMessage = "Session expired. Please log in again.";
+      } else if (err.response?.status === 400) {
+        errorMessage = "Invalid password. Please check and try again.";
+      }
+
+      setError(errorMessage);
       setLoading(false);
     }
   };
