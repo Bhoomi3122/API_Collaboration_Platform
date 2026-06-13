@@ -2,15 +2,21 @@ package com.apiplatform.api_platform.workspace.service;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
 
 @Service
 public class EmailService {
+
+    private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
 
     private final JavaMailSender mailSender;
 
@@ -24,6 +30,7 @@ public class EmailService {
         this.mailSender = mailSender;
     }
 
+    @Async
     public void sendInvitationEmail(
             String toEmail,
             String workspaceName,
@@ -31,26 +38,61 @@ public class EmailService {
             String token,
             String role
     ) {
+        logger.info("[EMAIL] Attempting to send invitation email to: {}", toEmail);
+        logger.info("[EMAIL] Using sender: {}", senderEmail);
+
         try {
             MimeMessage message = mailSender.createMimeMessage();
+            // true = multipart (needed to send both plain text + HTML)
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-            helper.setFrom(senderEmail, "Specify");
+            helper.setFrom(senderEmail, "Specify Team");
             helper.setTo(toEmail);
-            helper.setSubject("You've been invited to join \"" + workspaceName + "\" on Specify");
+            helper.setReplyTo(senderEmail, "Specify Team");
+            // Clean subject — avoid special characters like quotes that trigger spam filters
+            helper.setSubject("Invitation to join " + workspaceName + " on Specify");
 
             String acceptUrl = baseUrl + "/invitations/accept?token=" + token;
             String rejectUrl = baseUrl + "/invitations/reject?token=" + token;
 
+            logger.info("[EMAIL] Accept URL: {}", acceptUrl);
+
+            String plainText = buildEmailPlainText(workspaceName, inviterName, role, acceptUrl, rejectUrl);
             String htmlBody = buildEmailHtml(workspaceName, inviterName, role, acceptUrl, rejectUrl);
 
-            helper.setText(htmlBody, true); // true = isHtml
+            // Send BOTH plain text and HTML — spam filters trust multipart emails more
+            helper.setText(plainText, htmlBody);
 
             mailSender.send(message);
 
-        } catch (MessagingException | UnsupportedEncodingException e) {
-            throw new RuntimeException("Failed to send invitation email to: " + toEmail, e);
+            logger.info("[EMAIL] ✅ Invitation email successfully sent to: {}", toEmail);
+
+        } catch (MailException e) {
+            logger.error("[EMAIL] ❌ MailException while sending to {}: {}", toEmail, e.getMessage(), e);
+        } catch (MessagingException e) {
+            logger.error("[EMAIL] ❌ MessagingException while sending to {}: {}", toEmail, e.getMessage(), e);
+        } catch (UnsupportedEncodingException e) {
+            logger.error("[EMAIL] ❌ UnsupportedEncodingException while sending to {}: {}", toEmail, e.getMessage(), e);
+        } catch (Exception e) {
+            logger.error("[EMAIL] ❌ Unexpected error while sending email to {}: {}", toEmail, e.getMessage(), e);
         }
+    }
+
+    private String buildEmailPlainText(
+            String workspaceName,
+            String inviterName,
+            String role,
+            String acceptUrl,
+            String rejectUrl
+    ) {
+        return "Hi,\n\n" +
+               inviterName + " has invited you to collaborate on the workspace: " + workspaceName + "\n" +
+               "Your role: " + role + "\n\n" +
+               "Accept the invitation:\n" + acceptUrl + "\n\n" +
+               "Decline the invitation:\n" + rejectUrl + "\n\n" +
+               "This invitation expires in 7 days.\n\n" +
+               "If you did not expect this invitation, you can safely ignore this email.\n\n" +
+               "— The Specify Team";
     }
 
     private String buildEmailHtml(
