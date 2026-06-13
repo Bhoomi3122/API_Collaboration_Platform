@@ -1,6 +1,6 @@
 import apiClient from "./apiClient";
 
-export const signup = (data) => apiClient.post("/api/auth/signup", data);
+export const signup = (data) => apiClient.post("/auth/signup", data);
 
-export const login = (data) => apiClient.post("/api/auth/login", data);
+export const login = (data) => apiClient.post("/auth/login", data);
 
