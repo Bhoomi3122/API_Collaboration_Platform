@@ -59,6 +59,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/workspaces/*/invite").authenticated()
                         .requestMatchers(HttpMethod.GET,  "/api/invitations/pending").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/invitations/*/accept").authenticated()
